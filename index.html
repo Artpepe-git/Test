@@ -273,13 +273,11 @@ function vResult(){
   const max = Math.max(1, order[0].v);
   const leaders = order.filter(o=>o.place===1);
   const d = new Date();
-  const code = `${st.name||"Без имени"}${st.group?" ("+st.group+")":""} · ${d.toLocaleDateString("ru-RU")} · ` + order.map(o=>`${ROLES[o.i].n} ${o.v}`).join(", ");
+  const code = `${st.name||"Без имени"}${st.group?" ("+st.group+")":""} · ${d.toLocaleDateString("ru-RU")} · Итого по столбцам: ` + sc.join(" | ");
   return `${topLine()}
   <div class="who"><span class="muted small">Результат</span><h1>${esc(st.name||"Ваш результат")}</h1>${st.group?`<span class="muted">${esc(st.group)}</span>`:""}</div>
   <div class="panel sheet"><span class="muted small">Ваша таблица «Подсчет результатов». Нажмите, чтобы увеличить. Зажмите картинку пальцем → «Сохранить» и отправьте преподавателю.</span><img id="sheetImg" alt="Заполненная таблица подсчёта результатов"></div>
-  ${leaders.map(o=>`<div class="panel lead"><span class="tag">${leaders.length>1?"ГЛАВНЫЕ РОЛИ":"ГЛАВНАЯ РОЛЬ"} · ${o.v} БАЛЛОВ</span><h2>${ROLES[o.i].n}</h2><p>${ROLES[o.i].d}</p><p class="weak">Обратите внимание: ${ROLES[o.i].w.charAt(0).toLowerCase()+ROLES[o.i].w.slice(1)}</p></div>`).join("")}
-  <div class="panel"><div class="roles">${order.map(o=>`<div class="role ${o.v>0&&o.place<=3?"r"+o.place:""}"><span class="pl">${o.place}</span><div><div class="nm">${ROLES[o.i].n}</div><div class="tr"><i style="width:${(o.v/max*100).toFixed(1)}%"></i></div></div><span class="v">${o.v}</span></div>`).join("")}</div></div>
-  <p class="muted small">Сумма всех баллов — 70. Чем больше баллов у роли, тем естественнее она для вас в команде. Две-три верхние роли — ваш основной стиль.</p>
+  <p class="muted small">Что означает каждый столбец, расскажет преподаватель на занятии.</p>
   <div class="panel" style="display:flex;flex-direction:column;gap:10px"><span class="muted small">Покажите этот экран преподавателю или отправьте строку ниже</span><p class="code" id="code">${esc(code)}</p><button class="btn ghost" id="copy">Скопировать результат</button></div>
   <div class="row"><button class="btn ghost" id="edit">Изменить ответы</button><button class="btn" id="again">Пройти заново</button></div>`;
 }
@@ -296,7 +294,7 @@ function vQR(){
 function drawSheet(){
   const sc = scores();
   const W = 1600, left = 70, top = 230, c0 = 130, cw = (W - left*2 - c0)/8, hh = 150, rh = 96, th = 104;
-  const H = top + hh + rh*7 + th + 170;
+  const H = top + hh + rh*7 + th + 110;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
   const g = cv.getContext("2d");
   const SERIF = 'Georgia, "Times New Roman", "PT Serif", serif', SANS = 'Arial, "Helvetica Neue", sans-serif';
@@ -312,14 +310,6 @@ function drawSheet(){
   const X = i => left + c0 + cw*i;
   // highlight leader columns
   sc.forEach((v,i)=>{ if(v===max && v>0){ g.fillStyle = "#FFF4CC"; g.fillRect(X(i), top, cw, hh + rh*7 + th); } });
-  // header: role names
-  g.fillStyle = "#000"; g.font = `bold 19px ${SANS}`;
-  ROLES.forEach((ro,i)=>{
-    const words = ro.n.split(" "); const lines = [];
-    words.forEach(w=>{ const last = lines[lines.length-1]; if(last && g.measureText(last+" "+w).width < cw-16) lines[lines.length-1] = last+" "+w; else lines.push(w); });
-    const y0 = top + hh/2 - (lines.length-1)*14 + 8;
-    lines.forEach((ln,k)=>g.fillText(ln, X(i)+cw/2, y0 + k*28));
-  });
   // rows
   for(let b=0;b<7;b++){
     const y = top + hh + rh*b;
@@ -347,11 +337,8 @@ function drawSheet(){
   g.moveTo(left, bottom); g.lineTo(right, bottom);
   g.stroke();
   // leader line
-  const lead = ROLES.filter((_,i)=>sc[i]===max && max>0).map(r=>r.n).join(", ");
-  g.textAlign = "left"; g.fillStyle = "#000"; g.font = `bold 30px ${SANS}`;
-  g.fillText(`${lead.includes(",")?"Главные роли":"Главная роль"}: ${lead||"—"}`, left, bottom + 70);
-  g.font = `22px ${SANS}`; g.fillStyle = "#666";
-  g.fillText("В клетках: номер утверждения и отданные ему очки. Сумма всех очков — 70.", left, bottom + 115);
+  g.textAlign = "left"; g.font = `22px ${SANS}`; g.fillStyle = "#666";
+  g.fillText("В клетках: номер утверждения и отданные ему очки. Сумма всех очков — 70.", left, bottom + 70);
   return cv.toDataURL("image/png");
 }
 
