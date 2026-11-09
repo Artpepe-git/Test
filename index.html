@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Тест Белбина</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Волна (тёмная): лента из тонких линий на почти чёрном фоне; один столбец под телефон, меню — текстом без плашек */
+:root{
+  color-scheme:dark;
+  --bg:#02040b; --surface:#070b18; --surface-raised:#111a33; --ink:#f4f7ff; --ink-muted:#9aa6c4;
+  --line:#18213d; --border-strong:#5a6a96; --accent:#8fbaff; --on-accent:#050913; --danger:#ff7c8c; --success:#6fe3a4;
+  --wave:#a9c8ff; --glow:#3b6fff; --deep:#0d2a78; --select:#1f4fd1; --select-hover:#2a5ae0;
+  --gold:#ffe08a; --silver:#c9d3ea; --bronze:#e8892c;
+  --glow-select:0 0 18px rgba(59,111,255,0.55); --text-glow:0 0 14px rgba(59,111,255,0.85);
+  --font:"M PLUS 1p","Noto Sans","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/22px var(--font);-webkit-tap-highlight-color:transparent}
+b,strong,h1,h2,h3{font-weight:500}
+button,input{font:inherit;color:inherit}
+#wall{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(130% 60% at 50% 62%, var(--deep) 0%, transparent 62%),linear-gradient(180deg,#000 0%,var(--bg) 25%,var(--bg) 80%,#000 100%)}
+#wall canvas{position:absolute;inset:0;width:100%;height:100%}
+.app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding-block:20px 190px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--ink-muted);font-size:13px}
+.top b{color:var(--ink);font-weight:500;font-size:14px}
+.clock{font-weight:500;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:var(--ink)}
+h1{font-size:40px;line-height:46px;font-weight:300;margin:0;letter-spacing:.01em;text-wrap:balance;text-shadow:0 0 8px rgba(0,0,0,.9)}
+h2{font-size:24px;line-height:30px;font-weight:300;margin:0;text-wrap:balance}
+p{margin:0}
+.muted{color:var(--ink-muted)}
+.small{font-size:13px;line-height:18px}
+.panel{background:rgba(7,11,24,.86);border:1px solid var(--line);border-radius:14px;padding:16px;backdrop-filter:blur(6px);box-shadow:0 2px 12px rgba(0,0,0,.45)}
+.rules{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.rules li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start}
+.rules li span{font-size:20px;line-height:22px;font-weight:300;color:var(--accent)}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-muted)}
+input[type=text]{background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:4px;padding:12px;font-size:16px;color:var(--ink);outline:none;width:100%}
+input[type=text]:focus{border-color:var(--accent);box-shadow:var(--glow-select)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--select);color:#fff;border:0;border-radius:8px;padding:14px 20px;font-size:16px;font-weight:500;cursor:pointer;min-height:48px}
+.btn:hover{background:var(--select-hover)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[disabled]{background:var(--surface-raised);color:var(--ink-muted);cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--border-strong);color:var(--accent)}
+.btn.wide{width:100%}
+/* progress: dots like the category row */
+.steps{display:flex;gap:6px}
+.steps i{flex:1;height:4px;border-radius:99px;background:var(--line)}
+.steps i.done{background:var(--wave);box-shadow:0 0 8px var(--glow)}
+.steps i.cur{background:var(--accent);box-shadow:var(--glow-select)}
+.blockhead{display:flex;flex-direction:column;gap:4px}
+.blockhead .k{font-size:13px;color:var(--ink-muted);letter-spacing:.04em}
+/* statements */
+.list{display:flex;flex-direction:column;gap:8px}
+.st{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px;border-radius:14px;background:rgba(7,11,24,.86);border:1px solid var(--line);transition:border-color .15s,box-shadow .15s}
+.st.on{border-color:var(--select);box-shadow:var(--glow-select)}
+.st p{font-size:15px;line-height:21px;min-width:0}
+.st.on p{color:var(--ink)}
+.st:not(.on) p{color:#c9d1e6}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:40px;height:40px;border-radius:50%;border:1px solid var(--border-strong);background:transparent;color:var(--ink);font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.stepper button:disabled{opacity:.3;cursor:not-allowed}
+.stepper button.plus:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.stepper output{width:30px;text-align:center;font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink-muted)}
+.st.on .stepper output{color:#fff;text-shadow:var(--text-glow)}
+/* sticky bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:linear-gradient(180deg,rgba(2,4,11,0) 0,rgba(2,4,11,.98) 22px);padding-top:30px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar .in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.meter{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.meter .pts{font-size:28px;line-height:30px;font-weight:300;font-variant-numeric:tabular-nums}
+.meter .pts small{font-size:13px;color:var(--ink-muted);margin-left:4px}
+.meter .msg{font-size:13px;line-height:18px;color:var(--ink-muted);text-align:right}
+.meter .msg.ok{color:var(--success)}
+.track{height:4px;border-radius:99px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--wave);box-shadow:0 0 10px var(--glow);transition:width .2s}
+.row{display:flex;gap:8px}
+.row .btn{flex:1}
+.row .btn.ghost{flex:0 0 auto}
+/* results */
+.who{display:flex;flex-direction:column;gap:2px}
+.roles{display:flex;flex-direction:column;gap:12px}
+.role{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center}
+.role .pl{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:500;background:var(--surface-raised);color:var(--ink-muted)}
+.role.r1 .pl{background:var(--gold);color:var(--on-accent);box-shadow:0 0 18px rgba(255,224,138,.5)}
+.role.r2 .pl{background:var(--silver);color:var(--on-accent)}
+.role.r3 .pl{background:var(--bronze);color:var(--on-accent)}
+.role .nm{font-size:15px;line-height:20px}
+.role .tr{height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.role .tr i{display:block;height:100%;background:var(--wave)}
+.role.r1 .tr i{background:var(--gold)}.role.r2 .tr i{background:var(--silver)}.role.r3 .tr i{background:var(--bronze)}
+.role .v{font-size:22px;font-weight:300;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
+.lead{display:flex;flex-direction:column;gap:6px}
+.lead .tag{font-size:12px;letter-spacing:.06em;color:var(--gold)}
+.lead h2{color:var(--gold);text-shadow:0 0 14px rgba(255,224,138,.35)}
+.lead .weak{font-size:13px;line-height:18px;color:var(--ink-muted)}
+.sheet{display:flex;flex-direction:column;gap:10px}
+.sheet img{display:block;width:100%;height:auto;border-radius:8px;background:#fff;-webkit-touch-callout:default}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.94);overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.zoom img{width:1200px;max-width:none;background:#fff;border-radius:8px}
+.zoom .btn{position:sticky;left:0;bottom:0}
+.code{font-size:13px;line-height:19px;color:var(--ink-muted);word-break:break-word}
+.qr{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.qr .box{background:#fff;padding:14px;border-radius:14px;width:min(100%,360px)}
+.qr .box img{display:block;width:100%;height:auto;image-rendering:pixelated}
+.link{font-size:12px;color:var(--ink-muted);word-break:break-all;user-select:all}
+.toplinks{display:flex;gap:16px}
+.toplinks button{background:none;border:0;padding:0;color:var(--ink-muted);font-size:13px;cursor:pointer}
+.toplinks button:hover{color:var(--accent)}
+.err{color:var(--danger);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="wall" aria-hidden="true"><canvas id="wave"></canvas></div>
+<main class="app" id="app"></main>
+<div class="bar" id="bar" hidden><div class="in" id="barIn"></div></div>
+
+<script>
+/* ---------- данные теста (из файла преподавателя) ---------- */
+const BLOCKS = [
+ {t:"Что я могу предложить команде:", s:[
+  "Я думаю, что я в состоянии быстро воспринимать и использовать новые возможности",
+  "Я легко кооперируюсь с людьми разных типов",
+  "Один из моих главных активов – продуцировать новые идеи",
+  "Я способен вовлекать людей, которые, по моему мнению, могут сделать большой вклад в достижение групповых целей",
+  "Мои личные способности эффективно доводить дело до самого конца",
+  "Я не представляю себе даже временного снижения своей популярности, даже если это приведет к увеличению прибыли",
+  "Обычно я чувствую, что реалистично и что дееспособно",
+  "Я способен предложить весомые аргументы в пользу другой линии действий, не провоцируя при этом предубеждений и предвзятости"]},
+ {t:"Что характеризует меня как члена команды:", s:[
+  "Я чувствую себя неуютно на собраниях, даже если они четко структурированы и продуманно организованы",
+  "Я склонен полагаться на людей, которые хорошо аргументируют свою точку зрения еще до того, как она была всесторонне обсуждена",
+  "Когда группа обсуждает новые идеи, я склонен слишком много говорить",
+  "Мои личные отношения мешают мне поддерживать коллег с энтузиазмом",
+  "Когда надо сделать какое-либо дело, некоторые люди считают, что я действую агрессивно и авторитарно",
+  "Я затрудняюсь брать на себя лидерскую роль, может потому, что слишком чувствителен к чувствам и настроениям группы",
+  "У меня есть склонность настолько увлекаться собственными идеями, что я забываю о том, что происходит вокруг",
+  "Мои коллеги считают, что я слишком забочусь о незначительных деталях и боюсь риска, что дело может быть испорчено"]},
+ {t:"Когда я работаю с другими над проектом:", s:[
+  "Я могу хорошо влиять на других людей, при этом, не оказывая на них сильного давления",
+  "Мое «шестое чувство» подсказывает и предохраняет меня от ошибок и инцидентов, которые иногда случаются из-за небрежности",
+  "Во имя достижения главных целей, я готов ускорять события, не тратя время на обсуждения",
+  "От меня всегда можно ожидать чего-либо оригинального",
+  "Я всегда готов поддержать хорошее предложение, которое принесет выгоду всем",
+  "Я постоянно отслеживаю последние идеи и новейшие достижения",
+  "Я думаю, что мои способности к суждениям и оценкам могут внести большой вклад в принятие правильных решений",
+  "На меня всегда можно положиться на завершающем этапе работы"]},
+ {t:"Моё отношение и интерес к групповой работе:", s:[
+  "Я искренне желаю узнать моих коллег получше",
+  "Я не боюсь ни оспаривать точку зрения другого человека, ни остаться в меньшинстве",
+  "Обычно я могу доказать несостоятельность неудачного предложения",
+  "Я думаю, что я способен хорошо выполнить любую функцию ради выполнения общего плана",
+  "Часто я избегаю очевидных решений и прихожу вместо этого к неожиданным решениям проблемы",
+  "Я стремлюсь все, что я делаю, доводить до совершенства",
+  "Я готов использовать контакты вне группы",
+  "Хотя я всегда открыт различным точкам зрения, я не испытываю трудностей при принятии решений"]},
+ {t:"Я чувствую удовлетворение от работы, потому что:", s:[
+  "Мне нравится анализировать ситуации и оценивать возможные направления деятельности",
+  "Мне интересно находить практические пути решения проблемы",
+  "Мне приятно чувствовать, что я помогаю созданию хороших отношений на работе",
+  "Часто я имею сильное влияние на принимаемые решения",
+  "Я имею открытые, приветливые отношения с людьми, которые могут предложить что-то новенькое",
+  "Я могу убеждать людей в необходимости определенной линии действий",
+  "Я чувствую себя хорошо дома, когда я могу уделить максимум внимания заданию",
+  "Я люблю работать с чем-либо, что стимулирует мое воображение"]},
+ {t:"Когда задание трудное и незнакомое:", s:[
+  "Я откладываю дело на время и размышляю над проблемой",
+  "Я готов сотрудничать с людьми, которые более позитивно и с большим энтузиазмом относятся к проблеме",
+  "Я пытаюсь сделать задание проще, подыскивая в группе людей, которые могут взять на себя решение части проблемы",
+  "Мое врожденное ощущение времени позволяет мне выдерживать сроки выполнения задания",
+  "Я думаю, мне удастся сохранить ясность мысли и спокойствие",
+  "Даже под давлением внешних обстоятельств я не отступаю от цели",
+  "Я готов взять лидерские обязанности на себя, если я чувствую, что группа не прогрессирует",
+  "Я бы начал дискуссию с целью стимулировать появление новых мыслей, способствующих решению проблемы"]},
+ {t:"Проблемы, возникающие при работе в группах:", s:[
+  "Я склонен выражать свое нетерпение по отношению к людям, которые стоят на пути развития прогресса (мешают)",
+  "Другие могут критиковать меня за то, что я слишком аналитичен и не подключаю интуицию",
+  "Мое желание убедиться в том, что работа выполняется с высоким качеством, может иногда привести к задержке",
+  "Мне быстро все надоедает, и я полагаюсь на то, что кто-то из группы стимулирует мой интерес",
+  "Мне трудно приступить к решению задачи, не имея четкой цели",
+  "Иногда мне трудно объяснить и описать проблему в комплексе",
+  "Я знаю, что я требую от других того, что я сам не могу выполнить",
+  "Я затрудняюсь выражать собственное мнение, когда я нахожусь в очевидной оппозиции к большинству"]},
+];
+/* ключ из файла: номер утверждения (10–77) по столбцам ролей */
+const KEY = [
+ [16,13,15,12,10,17,11,14],[20,21,24,26,22,23,25,27],[37,30,32,33,35,36,34,31],
+ [43,47,41,44,46,42,40,45],[51,55,53,57,54,50,52,56],[65,62,66,60,67,64,61,63],[74,76,70,75,73,71,77,72]];
+const ROLES = [
+ {n:"Исполнитель", d:"Дисциплинированный, надёжный и практичный. Превращает идеи в конкретный план и выполняет его.", w:"Может быть негибким и не сразу принимает новые идеи."},
+ {n:"Координатор", d:"Спокойный и уверенный. Проясняет цели, распределяет обязанности и помогает команде принимать решения.", w:"Иногда перекладывает слишком много работы на других."},
+ {n:"Мотиватор", d:"Энергичный, любит трудные задачи. Подталкивает команду вперёд и помогает преодолевать препятствия.", w:"Бывает резким и нетерпеливым."},
+ {n:"Генератор идей", d:"Творческий, мыслит нестандартно. Предлагает новые идеи и находит выход в сложных задачах.", w:"Может упускать детали и хуже общаться с другими."},
+ {n:"Исследователь ресурсов", d:"Общительный и любознательный. Находит возможности, контакты и полезную информацию за пределами команды.", w:"Быстро теряет интерес, когда первый энтузиазм прошёл."},
+ {n:"Аналитик", d:"Трезвый и рассудительный. Взвешивает все варианты и помогает выбрать правильное решение.", w:"Может не хватать энергии, чтобы вдохновлять других."},
+ {n:"Командный работник", d:"Дружелюбный и тактичный. Поддерживает хорошую атмосферу и сглаживает конфликты.", w:"Бывает нерешительным в спорных ситуациях."},
+ {n:"Завершитель", d:"Старательный и внимательный к деталям. Находит ошибки и доводит работу до конца в срок.", w:"Склонен лишний раз волноваться и не любит делегировать."},
+];
+const PUBLIC_URL = "";
+const QR_SRC = "";
+
+/* ---------- состояние ---------- */
+const SKEY = "belbin-kodirovshchik-v1";
+let st = { screen:"intro", name:"", group:"", b:0, pts:BLOCKS.map(()=>Array(8).fill(0)) };
+try{ const raw = localStorage.getItem(SKEY); if(raw){ const d = JSON.parse(raw); if(d && Array.isArray(d.pts) && d.pts.length===7) st = Object.assign(st, d); } }catch(e){}
+function keep(){ try{ localStorage.setItem(SKEY, JSON.stringify(st)); }catch(e){} }
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sum = a => a.reduce((x,y)=>x+y,0);
+const used = a => a.filter(v=>v>0).length;
+function blockState(a){
+  const s = sum(a), u = used(a);
+  if(s===10) return {ok:true, msg:"Готово — можно дальше"};
+  if(s<10) return {ok:false, msg: u>=4 ? "Уже выбрано 4 утверждения — добавьте очки им" : `Распределите ещё ${10-s} ${plural(10-s)}`};
+  return {ok:false, msg:"Больше 10 очков"};
+}
+function plural(n){ const m10=n%10, m100=n%100; if(m10===1&&m100!==11) return "очко"; if(m10>=2&&m10<=4&&(m100<12||m100>14)) return "очка"; return "очков"; }
+
+/* ---------- экраны ---------- */
+function topLine(){
+  const d=new Date();
+  return `<div class="top"><span><b>Кодировщик</b> · тест Белбина</span><span class="clock">${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</span></div>`;
+}
+function vIntro(){
+  return `${topLine()}
+  <h1>Какая роль в команде — твоя?</h1>
+  <p class="muted">7 блоков по 8 утверждений. В каждом блоке у вас 10 очков: отдайте их утверждениям, с которыми согласны.</p>
+  <div class="panel"><ul class="rules">
+    <li><span>10</span><p>очков на каждый блок — нужно распределить все.</p></li>
+    <li><span>4</span><p>утверждения максимум получают очки в одном блоке.</p></li>
+    <li><span>2</span><p>очка минимум, если отдаёте утверждению хоть что-то. Полностью согласны — можно все 10.</p></li>
+  </ul></div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <label class="f" for="nm">Фамилия и имя<input type="text" id="nm" autocomplete="name" value="${esc(st.name)}" placeholder="Иванов Иван"></label>
+    <label class="f" for="gr">Группа<input type="text" id="gr" value="${esc(st.group)}" placeholder="К2083-26"></label>
+  </div>
+  <button class="btn wide" id="go">${st.pts.some(a=>sum(a)>0) ? "Продолжить тест" : "Начать тест"}</button>
+  <div class="toplinks">${QR_SRC?'<button id="qrBtn">QR-код для класса</button>':""}${st.pts.some(a=>sum(a)>0)?'<button id="reset">Начать заново</button>':''}</div>`;
+}
+function vBlock(){
+  const B = BLOCKS[st.b], a = st.pts[st.b], u = used(a), s = sum(a);
+  return `${topLine()}
+  <div class="steps" aria-hidden="true">${BLOCKS.map((_,i)=>`<i class="${i<st.b?"done":i===st.b?"cur":""}"></i>`).join("")}</div>
+  <div class="blockhead"><span class="k">БЛОК ${st.b+1} ИЗ 7</span><h2>${esc(B.t)}</h2></div>
+  <div class="list">${B.s.map((t,i)=>{
+    const v=a[i], canPlus = (v>0 || u<4) && s + (v===0?2:1) <= 10;
+    return `<div class="st${v>0?" on":""}"><p>${esc(t)}</p><div class="stepper">
+      <button class="minus" data-i="${i}" data-d="-1" ${v===0?"disabled":""} aria-label="Убрать очко">−</button>
+      <output aria-live="polite">${v}</output>
+      <button class="plus" data-i="${i}" data-d="1" ${canPlus?"":"disabled"} aria-label="Добавить очко">+</button></div></div>`; }).join("")}
+  </div>`;
+}
+function barBlock(){
+  const a = st.pts[st.b], s = sum(a), bs = blockState(a);
+  return `<div class="meter"><span class="pts">${s}<small>из 10 очков</small></span><span class="msg${bs.ok?" ok":""}">${bs.msg}</span></div>
+  <div class="track"><i style="width:${Math.min(100,s*10)}%"></i></div>
+  <div class="row"><button class="btn ghost" id="back">Назад</button><button class="btn" id="next" ${bs.ok?"":"disabled"}>${st.b===6?"Узнать результат":"Дальше"}</button></div>`;
+}
+function scores(){
+  const r = Array(8).fill(0);
+  KEY.forEach((row,b)=>row.forEach((num,col)=>{ r[col] += st.pts[b][num%10]; }));
+  return r;
+}
+function vResult(){
+  const sc = scores();
+  const order = sc.map((v,i)=>({i,v})).sort((x,y)=>y.v-x.v);
+  let place=0, prev=null; order.forEach((o,k)=>{ if(o.v!==prev){ place=k+1; prev=o.v; } o.place=place; });
+  const max = Math.max(1, order[0].v);
+  const leaders = order.filter(o=>o.place===1);
+  const d = new Date();
+  const code = `${st.name||"Без имени"}${st.group?" ("+st.group+")":""} · ${d.toLocaleDateString("ru-RU")} · ` + order.map(o=>`${ROLES[o.i].n} ${o.v}`).join(", ");
+  return `${topLine()}
+  <div class="who"><span class="muted small">Результат</span><h1>${esc(st.name||"Ваш результат")}</h1>${st.group?`<span class="muted">${esc(st.group)}</span>`:""}</div>
+  <div class="panel sheet"><span class="muted small">Ваша таблица «Подсчет результатов». Нажмите, чтобы увеличить. Зажмите картинку пальцем → «Сохранить» и отправьте преподавателю.</span><img id="sheetImg" alt="Заполненная таблица подсчёта результатов"></div>
+  ${leaders.map(o=>`<div class="panel lead"><span class="tag">${leaders.length>1?"ГЛАВНЫЕ РОЛИ":"ГЛАВНАЯ РОЛЬ"} · ${o.v} БАЛЛОВ</span><h2>${ROLES[o.i].n}</h2><p>${ROLES[o.i].d}</p><p class="weak">Обратите внимание: ${ROLES[o.i].w.charAt(0).toLowerCase()+ROLES[o.i].w.slice(1)}</p></div>`).join("")}
+  <div class="panel"><div class="roles">${order.map(o=>`<div class="role ${o.v>0&&o.place<=3?"r"+o.place:""}"><span class="pl">${o.place}</span><div><div class="nm">${ROLES[o.i].n}</div><div class="tr"><i style="width:${(o.v/max*100).toFixed(1)}%"></i></div></div><span class="v">${o.v}</span></div>`).join("")}</div></div>
+  <p class="muted small">Сумма всех баллов — 70. Чем больше баллов у роли, тем естественнее она для вас в команде. Две-три верхние роли — ваш основной стиль.</p>
+  <div class="panel" style="display:flex;flex-direction:column;gap:10px"><span class="muted small">Покажите этот экран преподавателю или отправьте строку ниже</span><p class="code" id="code">${esc(code)}</p><button class="btn ghost" id="copy">Скопировать результат</button></div>
+  <div class="row"><button class="btn ghost" id="edit">Изменить ответы</button><button class="btn" id="again">Пройти заново</button></div>`;
+}
+function vQR(){
+  return `${topLine()}
+  <div class="qr"><h1>Наведите камеру</h1>
+  <p class="muted">Отсканируйте QR-код, чтобы пройти тест на телефоне.</p>
+  ${QR_SRC.startsWith("data:")?`<div class="box"><img src="${QR_SRC}" alt="QR-код со ссылкой на тест"></div>`:`<p class="err">QR-код появится после публикации теста.</p>`}
+  ${PUBLIC_URL.startsWith("http")?`<p class="link">${esc(PUBLIC_URL)}</p>`:""}
+  <button class="btn ghost" id="qrBack">Назад</button></div>`;
+}
+
+/* ---------- таблица «Подсчет результатов» картинкой ---------- */
+function drawSheet(){
+  const sc = scores();
+  const W = 1600, left = 70, top = 230, c0 = 130, cw = (W - left*2 - c0)/8, hh = 150, rh = 96, th = 104;
+  const H = top + hh + rh*7 + th + 170;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const g = cv.getContext("2d");
+  const SERIF = 'Georgia, "Times New Roman", "PT Serif", serif', SANS = 'Arial, "Helvetica Neue", sans-serif';
+  g.fillStyle = "#fff"; g.fillRect(0,0,W,H);
+  g.fillStyle = "#000"; g.textAlign = "center"; g.textBaseline = "alphabetic";
+  g.font = `bold 46px ${SERIF}`; g.fillText("Подсчет результатов", W/2, 80);
+  const d = new Date();
+  g.font = `30px ${SANS}`; g.fillStyle = "#222";
+  g.fillText(`${st.name||"Без имени"}${st.group?" · "+st.group:""} · ${d.toLocaleDateString("ru-RU")}`, W/2, 132);
+  g.font = `22px ${SANS}`; g.fillStyle = "#666";
+  g.fillText("Тест Белбина · Кодировщик · ПОБГ 2026–2027", W/2, 172);
+  const max = Math.max(...sc);
+  const X = i => left + c0 + cw*i;
+  // highlight leader columns
+  sc.forEach((v,i)=>{ if(v===max && v>0){ g.fillStyle = "#FFF4CC"; g.fillRect(X(i), top, cw, hh + rh*7 + th); } });
+  // header: role names
+  g.fillStyle = "#000"; g.font = `bold 19px ${SANS}`;
+  ROLES.forEach((ro,i)=>{
+    const words = ro.n.split(" "); const lines = [];
+    words.forEach(w=>{ const last = lines[lines.length-1]; if(last && g.measureText(last+" "+w).width < cw-16) lines[lines.length-1] = last+" "+w; else lines.push(w); });
+    const y0 = top + hh/2 - (lines.length-1)*14 + 8;
+    lines.forEach((ln,k)=>g.fillText(ln, X(i)+cw/2, y0 + k*28));
+  });
+  // rows
+  for(let b=0;b<7;b++){
+    const y = top + hh + rh*b;
+    g.textAlign = "center"; g.fillStyle = "#000"; g.font = `bold 26px ${SERIF}`;
+    g.fillText(String(b+1), left + c0/2, y + 38); g.fillText("блок", left + c0/2, y + 76);
+    KEY[b].forEach((num,i)=>{
+      const v = st.pts[b][num%10];
+      g.textAlign = "left"; g.fillStyle = "#555"; g.font = `22px ${SERIF}`;
+      g.fillText(String(num), X(i) + 12, y + 30);
+      if(v>0){ g.textAlign = "center"; g.fillStyle = "#0b2a8f"; g.font = `bold 44px ${SANS}`; g.fillText(String(v), X(i) + cw/2 + 8, y + 74); }
+    });
+  }
+  // totals
+  const ty = top + hh + rh*7;
+  g.textAlign = "center"; g.fillStyle = "#000"; g.font = `bold 26px ${SERIF}`; g.fillText("Итого", left + c0/2, ty + th/2 + 9);
+  sc.forEach((v,i)=>{ g.font = `bold 46px ${SANS}`; g.fillStyle = v===max && v>0 ? "#9a6a00" : "#000"; g.fillText(String(v), X(i) + cw/2, ty + th/2 + 16); });
+  // grid lines (top-left corner cell left open, like the paper form)
+  g.strokeStyle = "#000"; g.lineWidth = 2;
+  const bottom = ty + th, right = left + c0 + cw*8;
+  g.beginPath();
+  g.moveTo(left + c0, top); g.lineTo(right, top);
+  for(let k=0;k<=8;k++){ g.moveTo(X(k), top); g.lineTo(X(k), bottom); }
+  g.moveTo(left, top + hh); g.lineTo(left, bottom);
+  for(let k=0;k<=7;k++){ const y = top + hh + rh*k; g.moveTo(left, y); g.lineTo(right, y); }
+  g.moveTo(left, bottom); g.lineTo(right, bottom);
+  g.stroke();
+  // leader line
+  const lead = ROLES.filter((_,i)=>sc[i]===max && max>0).map(r=>r.n).join(", ");
+  g.textAlign = "left"; g.fillStyle = "#000"; g.font = `bold 30px ${SANS}`;
+  g.fillText(`${lead.includes(",")?"Главные роли":"Главная роль"}: ${lead||"—"}`, left, bottom + 70);
+  g.font = `22px ${SANS}`; g.fillStyle = "#666";
+  g.fillText("В клетках: номер утверждения и отданные ему очки. Сумма всех очков — 70.", left, bottom + 115);
+  return cv.toDataURL("image/png");
+}
+
+/* ---------- отрисовка и события ---------- */
+function render(){
+  const app = $("app"), bar = $("bar");
+  if(st.screen==="intro"){ app.innerHTML = vIntro(); bar.hidden = true; }
+  else if(st.screen==="block"){ app.innerHTML = vBlock(); $("barIn").innerHTML = barBlock(); bar.hidden = false; }
+  else if(st.screen==="result"){ app.innerHTML = vResult(); bar.hidden = true; }
+  else if(st.screen==="qr"){ app.innerHTML = vQR(); bar.hidden = true; }
+  bind();
+}
+function bind(){
+  if(st.screen==="intro"){
+    $("nm").oninput = e=>{ st.name = e.target.value.trimStart(); keep(); };
+    $("gr").oninput = e=>{ st.group = e.target.value.trimStart(); keep(); };
+    $("go").onclick = ()=>{ st.screen="block"; keep(); render(); window.scrollTo(0,0); };
+    if($("qrBtn")) $("qrBtn").onclick = ()=>{ st.screen="qr"; render(); };
+    if($("reset")) $("reset").onclick = e=>{
+      const b = e.target; if(b.dataset.sure){ st.pts = BLOCKS.map(()=>Array(8).fill(0)); st.b=0; keep(); render(); }
+      else { b.dataset.sure="1"; b.textContent="Точно стереть ответы? Нажмите ещё раз"; b.style.color="var(--danger)"; }
+    };
+  }
+  if(st.screen==="block"){
+    document.querySelectorAll(".stepper button").forEach(btn=>btn.onclick=()=>{
+      const a = st.pts[st.b], i = +btn.dataset.i, d = +btn.dataset.d;
+      let v = a[i] + d;
+      if(d>0 && a[i]===0) v = 2;          // минимум 2 очка
+      if(d<0 && a[i]===2) v = 0;
+      a[i] = Math.max(0, Math.min(10, v));
+      keep(); render();
+    });
+    $("back").onclick = ()=>{ if(st.b===0){ st.screen="intro"; } else st.b--; keep(); render(); window.scrollTo(0,0); };
+    $("next").onclick = ()=>{ if(!blockState(st.pts[st.b]).ok) return; if(st.b===6){ st.screen="result"; } else st.b++; keep(); render(); window.scrollTo(0,0); };
+  }
+  if(st.screen==="result"){
+    $("sheetImg").src = drawSheet();
+    $("sheetImg").onclick = ()=>{ const o=document.createElement("div"); o.className="zoom"; o.innerHTML=`<img src="${$("sheetImg").src}" alt="Таблица подсчёта результатов"><button class="btn" id="zClose">Закрыть</button>`; document.body.appendChild(o); o.querySelector("#zClose").onclick=()=>o.remove(); };
+    $("copy").onclick = async e=>{
+      const t = $("code").textContent;
+      try{ await navigator.clipboard.writeText(t); e.target.textContent="Скопировано"; }
+      catch(err){ const r=document.createRange(); r.selectNodeContents($("code")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); e.target.textContent="Текст выделен — скопируйте его"; }
+    };
+    $("edit").onclick = ()=>{ st.screen="block"; st.b=0; keep(); render(); window.scrollTo(0,0); };
+    $("again").onclick = e=>{
+      const b=e.target; if(b.dataset.sure){ st = {screen:"intro", name:st.name, group:st.group, b:0, pts:BLOCKS.map(()=>Array(8).fill(0))}; keep(); render(); window.scrollTo(0,0); }
+      else { b.dataset.sure="1"; b.textContent="Стереть ответы?"; }
+    };
+  }
+  if(st.screen==="qr"){ $("qrBack").onclick = ()=>{ st.screen="intro"; render(); }; }
+}
+if(st.screen==="qr") st.screen="intro";
+render();
+setInterval(()=>{ const c=document.querySelector(".clock"); if(c){ const d=new Date(); c.textContent=`${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; } }, 20000);
+
+/* ---------- волна на фоне ---------- */
+(function(){
+  const cv = $("wave"), ctx = cv.getContext("2d");
+  function draw(){
+    const dpr = Math.min(2, window.devicePixelRatio||1), w = innerWidth, h = innerHeight;
+    cv.width = w*dpr; cv.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const mid = h*0.62, amp = h*0.13, k = Math.PI*2.4/w, n = 22;
+    ctx.save(); ctx.filter = "blur(12px)"; ctx.strokeStyle = "rgba(59,111,255,.5)"; ctx.lineWidth = 22; ctx.beginPath();
+    for(let x=-20;x<=w+20;x+=8){ const y = mid + Math.sin(x*k*0.5+1.3)*h*0.06; x===-20?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke(); ctx.restore();
+    for(let i=0;i<n;i++){
+      const t = (i/(n-1))*2-1; ctx.beginPath();
+      for(let x=-20;x<=w+20;x+=8){ const y = mid + Math.sin(x*k+0.6)*amp*t + Math.sin(x*k*0.5+1.3)*h*0.06 + t*8; x===-20?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+      ctx.strokeStyle = `rgba(169,200,255,${(0.1+0.32*(1-Math.abs(t))).toFixed(2)})`; ctx.lineWidth = i%5===0?1.1:0.6; ctx.stroke();
+    }
+  }
+  let t; addEventListener("resize", ()=>{ clearTimeout(t); t=setTimeout(draw,150); }); draw();
+})();
+</script>
+
+</body>
+</html>
