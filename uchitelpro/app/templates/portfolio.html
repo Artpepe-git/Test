@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% from "_m.html" import stars, profile_bars, badge_icon with context %}
+{% block title %}Портфолио{% endblock %}
+{% block body %}
+<div class="row sp"><div><h1>Портфолио</h1>
+  <div class="muted">{{ p.user.full_name }}{% if p.user.group_name %} · группа {{ p.user.group_name }}{% endif %}</div></div>
+  <button class="btn noprint" onclick="window.print()">Печать / PDF</button></div>
+
+<div class="grid g3" style="margin-top:12px">
+  <div class="card"><div class="muted small">Уровень</div><div class="kpi">{{ p.prog.level }}</div><div class="small muted">{{ p.prog.xp }} XP</div></div>
+  <div class="card"><div class="muted small">Волонтёрских часов</div><div class="kpi">{{ '%g'|format(p.hours) }}</div><div class="small muted">подтверждено преподавателем</div></div>
+  <div class="card"><div class="muted small">Кейсов пройдено</div><div class="kpi">{{ p.cases|length }}</div></div>
+</div>
+
+<h2>Профиль компетенций</h2><div class="card">{{ profile_bars(p.competencies) }}</div>
+
+<h2>Кейсы</h2>
+{% if p.cases %}<div class="tablewrap"><table><tr><th>Кейс</th><th>Попыток</th><th>Лучший результат</th><th>Оценка</th></tr>
+{% for c in p.cases %}<tr><td>{{ c.title }}</td><td>{{ c.n }}</td><td>{{ c.pct|pct }}</td><td>{{ stars(c.stars) }}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">Пока нет пройденных кейсов.</p>{% endif %}
+
+<h2>Волонтёрская практика</h2>
+{% if p.shifts %}<div class="tablewrap"><table><tr><th>Дата</th><th>Место</th><th>Форма</th><th>Часы</th></tr>
+{% for s in p.shifts %}<tr><td>{{ s.shift_date|d }}</td><td>{{ s.place }}</td><td>{{ s.form }}</td><td>{{ '%g'|format(s.hours) }}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">Подтверждённых смен нет.</p>{% endif %}
+
+<h2>Принятые полевые заметки</h2>
+{% for n in p.notes %}<div class="card" style="margin-bottom:8px"><b class="small">{{ n.created_at|d }}</b><p class="small">{{ n.situation }}</p></div>
+{% else %}<p class="muted">Нет.</p>{% endfor %}
+
+<h2>Значки</h2>
+<div class="row">{% for b in p.badges %}<span class="badge">{{ badge_icon(b.code, 14) }} {{ b.title }}</span>{% else %}<span class="muted">Нет.</span>{% endfor %}</div>
+
+<p class="small muted" style="margin-top:28px">Контрольный код: <b>{{ p.code }}</b> · сформировано {{ p.generated|dt }}. Код зависит от данных портфолио и позволяет заметить правку распечатки.</p>
+{% endblock %}

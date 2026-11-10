@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Волонтёрство{% endblock %}
+{% block body %}
+<h1>Волонтёрская практика</h1>
+<p class="muted">Подтверждённых часов: <b>{{ '%g'|format(approved) }}</b>. Смену подтверждает ваш преподаватель, после чего начисляется XP (15 XP за час, не более 90 за смену).</p>
+<div class="grid g2">
+<div class="card"><h3>Добавить смену</h3>
+<form method="post">{{ csrf() }}
+  <label>Дата</label><input type="date" name="shift_date" max="{{ today }}" value="{{ today }}" required>
+  <label>Место (школа, лагерь, организация)</label><input type="text" name="place" required maxlength="120">
+  <label>Форма участия</label><select name="form">{% for f in forms %}<option>{{ f }}</option>{% endfor %}</select>
+  <label>Часы</label><input type="number" name="hours" step="0.5" min="0.5" max="12" value="2" required>
+  <label>Что делали</label><textarea name="description" maxlength="600"></textarea>
+  <p><button class="btn primary">Отправить на подтверждение</button></p></form></div>
+<div><h3>Мои смены</h3>
+{% if shifts %}<div class="tablewrap"><table><tr><th>Дата</th><th>Место</th><th>Ч.</th><th>Статус</th></tr>
+{% for s in shifts %}<tr><td>{{ s.shift_date|d }}</td><td>{{ s.place }}<br><span class="muted small">{{ s.form }}</span></td><td>{{ '%g'|format(s.hours) }}</td>
+<td>{% if s.status == 'approved' %}<span class="badge ok">подтверждена +{{ s.xp_awarded }} XP</span>{% elif s.status == 'rejected' %}<span class="badge bad">отклонена</span>{% else %}<span class="badge warn">ожидает</span>{% endif %}
+{% if s.confirm_comment %}<br><span class="small muted">{{ s.confirm_comment }}</span>{% endif %}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">Смен пока нет.</p>{% endif %}</div></div>
+{% endblock %}

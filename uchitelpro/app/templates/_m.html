@@ -1,0 +1,57 @@
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrf_token }}">{% endmacro %}
+
+{% macro icon(name, size=18) -%}
+<svg class="ico" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+{%- if name == 'star' %}<path d="M12 2.5l2.9 6.2 6.7.8-5 4.6 1.4 6.7L12 17.4 6 20.8l1.4-6.7-5-4.6 6.7-.8z"/>
+{%- elif name == 'lock' %}<path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5v-8A1.5 1.5 0 0 1 5.5 10zm2 0h6V7a3 3 0 0 0-6 0z"/>
+{%- elif name == 'theme' %}<path d="M12 3a9 9 0 1 0 0 18zm0 2v14a7 7 0 0 1 0-14z"/>
+{%- elif name == 'flag' %}<path d="M5 3h2v18H5zM8 4h11l-2.5 4L19 12H8z"/>
+{%- elif name == 'compass' %}<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm4 3.5l-2.2 6.3-6.3 2.2 2.2-6.3z"/>
+{%- elif name == 'medal' %}<path d="M7 2h4l1 5 1-5h4l-3 8a7 7 0 1 1-4 0zM12 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+{%- elif name == 'cup' %}<path d="M6 3h12v4a6 6 0 0 1-5 5.9V16h3v2h1.5v3h-11v-3H8v-2h3v-3.1A6 6 0 0 1 6 7zM3.5 5H6v2H5.5a2 2 0 0 0 1 1.7V10A4 4 0 0 1 3.5 6zM18 5h2.5v1a4 4 0 0 1-3 4V8.7A2 2 0 0 0 18.5 7H18z"/>
+{%- elif name == 'heart' %}<path d="M12 21s-8-4.6-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.400-8 11-8 11z"/>
+{%- elif name == 'clock' %}<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5l4 2.300-1 1.700-5-3V7z"/>
+{%- elif name == 'note' %}<path d="M5 3h10l4 4v14H5zm9 1.500V8h3.500zM8 12h8v1.500H8zm0 3.500h8V17H8z"/>
+{%- elif name == 'pencil' %}<path d="M3 17.300V21h3.700L18.500 9.200l-3.700-3.700zM20.700 7a1 1 0 0 0 0-1.400l-2.300-2.300a1 1 0 0 0-1.400 0l-1.800 1.800 3.700 3.700z"/>
+{%- else %}<circle cx="12" cy="12" r="6"/>{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro badge_icon(code, size=20) -%}
+{{ icon({'first_case':'flag','three_stars':'star','both_cases':'compass','level_3':'medal','level_5':'cup','volunteer_first':'heart','volunteer_10h':'clock','note_accepted':'note','note_converted':'pencil'}.get(code,'star'), size) }}
+{%- endmacro %}
+
+{% macro stars(n) %}<span class="stars" role="img" aria-label="{{ n or 0 }} из 3">{% for i in range(3) %}<span class="{{ '' if i < (n or 0) else 'off' }}">{{ icon('star', 18) }}</span>{% endfor %}</span>{% endmacro %}
+
+{% macro dots(n, total=5) %}<span class="dots" role="img" aria-label="{{ n }} из {{ total }}">{% for i in range(total) %}<i class="{{ 'on' if i < n else '' }}"></i>{% endfor %}</span>{% endmacro %}
+
+{% macro bar(p, cls='') %}<div class="bar {{ cls }}"><i style="width: {{ [[p or 0, 0]|max, 100]|min }}%"></i></div>{% endmacro %}
+
+{% macro outcome_badge(o) %}{% if o == 'success' %}<span class="badge ok">Успех</span>{% elif o == 'partial' %}<span class="badge warn">Частично</span>{% elif o == 'fail' %}<span class="badge bad">Неудача</span>{% endif %}{% endmacro %}
+
+{% macro rating_badge(r) %}{% if r == 'best' %}<span class="badge ok">Оптимально</span>{% elif r == 'good' %}<span class="badge warn">Приемлемо</span>{% else %}<span class="badge bad">Слабо</span>{% endif %}{% endmacro %}
+
+{# Сцена: фон и персонажи — контейнеры. Если файла нет в data/assets, показывается заглушка. #}
+{% macro scene(node, asset_url) %}
+  {% set bg = asset_url('backgrounds', node.scene) %}
+  <div class="scene" {% if bg %}style="background-image:url('{{ bg }}')"{% endif %}>
+    {% if not bg %}<span class="ph-bg">Фон: {{ node.scene }}</span>{% endif %}
+    <div class="cast">
+      {% for ch in node.characters %}
+        {% set img = asset_url('characters', ch.id, ch.mood) %}
+        <div class="char">
+          {% if img %}<img src="{{ img }}" alt="{{ ch.id }}">{% else %}<div class="ph">Персонаж:<br>{{ asset_title("characters", ch.id) }}<br>({{ ch.mood or 'neutral' }})</div>{% endif %}
+          <div class="nm">{{ asset_title("characters", ch.id) }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro profile_bars(items) %}
+  <div class="stack">
+  {% for c in items %}
+    <div><div class="row sp small"><span>{{ c.title }}</span><b>{{ (c.pct ~ '%') if c.pct is not none else '—' }}</b></div>{{ bar(c.pct) }}</div>
+  {% endfor %}
+  </div>
+{% endmacro %}

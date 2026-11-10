@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Конструктор кейса{% endblock %}
+{% block body %}
+<h1>Конструктор кейса</h1>
+<p class="muted">Собирайте кейс из сцен: впишите текст, укажите, куда ведёт каждый выбор, и сколько баллов он даёт. Код писать не нужно: проверка работает сама и сразу показывает, чего не хватает.</p>
+{% if errors and not ana %}<div class="flash error"><b>Сервер нашёл ошибки:</b><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" id="caseform">{{ csrf() }}
+<div class="grid g3">
+  <div><label>Название</label><input type="text" name="title" value="{{ meta.title }}" required></div>
+  <div><label>Категория</label><input type="text" name="category" value="{{ meta.category }}"></div>
+  <div><label>Сложность (1–5)</label><input type="number" name="difficulty" min="1" max="5" value="{{ meta.difficulty }}"></div>
+  <div><label>Время, мин</label><input type="number" name="duration_min" min="1" max="120" value="{{ meta.duration_min }}"></div>
+</div>
+<label>Описание для студента</label><textarea name="description" style="min-height:60px">{{ meta.description }}</textarea>
+
+<div id="builder" data-check="{{ url_for('methodist.api_check') }}" data-csrf="{{ csrf_token }}" data-comps='{{ comps|tojson|forceescape }}'>
+  <noscript><div class="flash error">Для конструктора нужен включённый JavaScript.</div></noscript>
+</div>
+
+<div id="jsonpane" class="bld-json" hidden>
+  <p class="small muted">Для опытных: те же данные в виде JSON. После правки нажмите «Применить в конструкторе».</p>
+  <label>Граф (JSON)</label><textarea class="code" name="graph" id="graph-json" spellcheck="false">{{ graph }}</textarea>
+  <label>Разбор (JSON)</label><textarea class="code" name="review" id="review-json" spellcheck="false" style="min-height:200px">{{ review }}</textarea>
+  <p><button class="btn" type="button" id="json-apply">Применить в конструкторе</button></p>
+</div>
+
+<p class="row bld-actions"><button class="btn" name="action" value="check">Проверить</button>
+<button class="btn" name="action" value="save">Сохранить черновик</button>
+<button class="btn primary" name="action" value="publish">Опубликовать новую версию</button></p>
+</form>
+<script src="{{ url_for('static', filename='js/builder.js') }}"></script>
+{% endblock %}

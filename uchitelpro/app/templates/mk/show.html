@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% from "_m.html" import icon with context %}
+{% block title %}{{ m.title }}{% endblock %}
+{% block body %}
+<p class="small"><a href="{{ url_for('mk.index') }}">← Все мастер-классы</a></p>
+<div class="row sp"><div><span class="badge">{{ m.tag }}</span><h1 style="margin-top:6px">{{ m.title }}</h1>
+<p class="muted">{{ m.subtitle }}</p></div>
+<a class="btn" href="{{ url_for('mk.download', slug=m.slug) }}">Скачать .docx</a></div>
+<div class="card mkinfo">
+{% for k, v in m.meta %}<div><span class="mkk">{{ k }}</span><span>{{ v }}</span></div>{% endfor %}
+</div>
+{% macro body_items(list) %}
+  {% set ns = namespace(open=None, n=0) %}
+  {% for it in list %}
+    {% if it.t == 'num' and ns.open != 'ol' %}{% if ns.open %}</{{ ns.open }}>{% endif %}<ol class="mkl" start="{{ ns.n + 1 }}">{% set ns.open = 'ol' %}
+    {% elif it.t == 'bullet' and ns.open != 'ul' %}{% if ns.open %}</{{ ns.open }}>{% endif %}<ul class="mkl">{% set ns.open = 'ul' %}
+    {% elif it.t not in ('num', 'bullet') and ns.open %}</{{ ns.open }}>{% set ns.open = None %}{% endif %}
+    {% if it.t == 'say' %}<blockquote class="say">{{ it.v }}</blockquote>
+    {% elif it.t == 'note' %}<p class="mknote">{{ it.v }}</p>
+    {% elif it.t in ('num', 'bullet') %}{% if it.t == 'num' %}{% set ns.n = ns.n + 1 %}{% endif %}<li>{{ it.v }}</li>
+    {% else %}<p>{{ it.v }}</p>{% endif %}
+  {% endfor %}
+  {% if ns.open %}</{{ ns.open }}>{% endif %}
+{% endmacro %}
+{% for b in m.blocks %}
+<section class="card mkblock">
+  <header><div><span class="mkn">Блок {{ b.n }}</span><h2>{{ b.title }}</h2></div><span class="mktime">{{ icon('clock', 16) }} {{ b.minutes }} мин</span></header>
+  {{ body_items(b["items"]) }}
+</section>
+{% endfor %}
+<section class="card mkblock"><header><div><span class="mkn">{{ m.closing_title }}</span></div></header>{{ body_items(m.closing) }}</section>
+<p class="muted small">Общее время: {{ m.total_min }} мин</p>
+{% endblock %}

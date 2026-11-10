@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Группы{% endblock %}
+{% block body %}
+<h1>Мои группы</h1>
+{% if pending %}<div class="flash warn">Смен, ожидающих подтверждения: <b>{{ pending }}</b>. <a href="{{ url_for('teacher.shifts') }}">Открыть</a></div>{% endif %}
+<div class="grid g2" style="margin-top:12px">
+{% for x in groups %}<div class="card"><h3>{{ x.g.name }}</h3><div class="muted small">{{ x.g.course }} курс · студентов: {{ x.n }}</div>
+  <p>Средний результат: <b>{{ x.avg|pct }}</b></p><a class="btn primary sm" href="{{ url_for('teacher.group', gid=x.g.id) }}">Открыть</a></div>
+{% else %}<p class="muted">За вами не закреплено групп. Обратитесь к администратору.</p>{% endfor %}
+</div>
+<p style="margin-top:18px"><a class="btn" href="{{ url_for('admin.export_results') }}">Выгрузить результаты (CSV)</a></p>
+{% endblock %}

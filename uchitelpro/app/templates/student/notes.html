@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Полевые заметки{% endblock %}
+{% block body %}
+<h1>Полевые заметки</h1>
+<p class="muted">Опишите реальную ситуацию из практики. Методист примет заметку (+30 XP) или превратит её в кейс (+60 XP). Не указывайте фамилии детей и другие персональные данные.</p>
+<div class="grid g2">
+<div class="card"><h3>Новая заметка</h3>
+<form method="post">{{ csrf() }}
+  <label>Ситуация</label><textarea name="situation" required minlength="20" maxlength="1500"></textarea>
+  <label>Что вы сделали</label><textarea name="action" required maxlength="1000"></textarea>
+  <label>Что получилось</label><textarea name="result" required maxlength="1000"></textarea>
+  <label>Чему научились (необязательно)</label><textarea name="lesson" maxlength="800"></textarea>
+  <label>Привязать к смене</label><select name="shift_id"><option value="">—</option>
+    {% for s in shifts %}<option value="{{ s.id }}">{{ s.shift_date|d }} · {{ s.place }}</option>{% endfor %}</select>
+  <p><button class="btn primary">Отправить</button></p></form></div>
+<div><h3>Мои заметки</h3>
+{% for n in items %}<div class="card" style="margin-bottom:10px"><div class="row sp"><span class="small muted">{{ n.created_at|dt }}</span>
+  {% if n.status == 'submitted' %}<span class="badge warn">на проверке</span>{% elif n.status == 'accepted' %}<span class="badge ok">принята</span>
+  {% elif n.status == 'converted' %}<span class="badge ok">стала кейсом</span>{% else %}<span class="badge bad">отклонена</span>{% endif %}</div>
+  <p class="small">{{ n.situation }}</p>{% if n.reviewer_comment %}<p class="small muted"><b>Методист:</b> {{ n.reviewer_comment }}</p>{% endif %}</div>
+{% else %}<p class="muted">Заметок пока нет.</p>{% endfor %}</div></div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Обзор{% endblock %}
+{% block body %}
+<h1>Обзор системы</h1>
+{% if demo %}<div class="flash warn">В системе есть демо-учётные записи ({{ demo }}). Перед реальным использованием отключите их в разделе «Пользователи».</div>{% endif %}
+<div class="grid g3" style="margin-top:12px">
+  {% for r in ['student', 'teacher', 'methodist', 'admin'] %}<div class="card"><div class="muted small">{{ ROLE_TITLES[r] }}</div><div class="kpi">{{ counts.get(r, 0) }}</div></div>{% endfor %}
+  <div class="card"><div class="muted small">Опубликованных кейсов</div><div class="kpi">{{ stats.cases }}</div></div>
+  <div class="card"><div class="muted small">Зачётных прохождений</div><div class="kpi">{{ stats.attempts }}</div></div>
+  <div class="card"><div class="muted small">Смен / заметок на проверке</div><div class="kpi">{{ stats.shifts }} / {{ stats.notes }}</div></div>
+</div>
+<p style="margin-top:18px" class="row"><a class="btn" href="{{ url_for('admin.export_results') }}">Выгрузить результаты (CSV)</a>
+<a class="btn" href="{{ url_for('admin.backup') }}">Резервные копии</a></p>
+{% endblock %}

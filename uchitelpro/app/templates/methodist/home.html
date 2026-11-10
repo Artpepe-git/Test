@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Кейсы{% endblock %}
+{% block body %}
+<div class="row sp"><h1>Библиотека кейсов</h1>
+<form method="post" action="{{ url_for('methodist.new') }}" class="row">{{ csrf() }}
+  <input type="text" name="title" placeholder="Название нового кейса" class="inline" style="width:240px">
+  <input type="text" name="category" placeholder="Категория" class="inline" style="width:160px">
+  <button class="btn primary">Создать черновик</button></form></div>
+{% if notes %}<div class="flash warn">Заметок на проверке: <b>{{ notes }}</b>. <a href="{{ url_for('methodist.notes') }}">Открыть</a></div>{% endif %}
+<div class="tablewrap" style="margin-top:12px"><table><tr><th>Кейс</th><th>Статус</th><th>Версия</th><th>Прохождений</th><th>Средний</th><th></th></tr>
+{% for c in cases %}<tr><td><b>{{ c.title }}</b><br><span class="muted small">{{ c.category }}</span></td>
+<td>{% if c.status == 'published' %}<span class="badge ok">опубликован</span>{% elif c.status == 'archived' %}<span class="badge gray">архив</span>{% else %}<span class="badge warn">черновик</span>{% endif %}</td>
+<td>{{ c.version or '—' }}</td><td>{{ c.n }}</td><td>{{ c.avg|pct }}</td>
+<td class="row"><a class="btn sm" href="{{ url_for('methodist.case', cid=c.id) }}">Аналитика</a>
+<a class="btn sm" href="{{ url_for('methodist.edit', cid=c.id) }}">Редактор</a>
+{% if c.current_version_id %}<form method="post" action="{{ url_for('methodist.archive', cid=c.id) }}">{{ csrf() }}<button class="btn sm">{{ 'В архив' if c.status == 'published' else 'Вернуть' }}</button></form>{% endif %}
+<a class="btn sm danger" href="{{ url_for('methodist.delete', cid=c.id) }}">Удалить</a></td></tr>
+{% endfor %}</table></div>
+{% endblock %}

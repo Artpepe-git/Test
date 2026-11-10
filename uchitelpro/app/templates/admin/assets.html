@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Графика{% endblock %}
+{% block body %}
+<h1>Контейнеры под графику</h1>
+<p class="muted">Платформа показывает заглушку на месте каждого фона и персонажа. Когда рисунок готов, загрузите файл в нужный контейнер (или просто положите его в папку <code>{{ folder }}</code> под тем же именем, например <code>characters/liza.png</code>). Форматы: PNG, WebP, JPG, SVG, GIF. Для персонажа можно добавить варианты настроения: <code>liza_sad.png</code>, <code>artem_angry.png</code>. Рекомендуемый размер фона — 1600×900, персонажа — прозрачный PNG высотой около 900.</p>
+<div class="grid g3">
+{% for s in slots %}{% if not s.optional or s.url %}
+  <div class="slot {{ '' if s.url else 'empty' }}">
+    {% if s.url %}<img src="{{ s.url }}" alt="">{% endif %}
+    <b>{{ s.label }}</b><div class="small muted">{{ s.kind }}/{{ s.name }}.*</div>
+    <div class="small muted">Где используется: {{ s.used|join(', ') }}</div>
+    <form method="post" enctype="multipart/form-data" class="stack" style="margin-top:8px">{{ csrf() }}
+      <input type="hidden" name="kind" value="{{ s.kind }}"><input type="hidden" name="name" value="{{ s.name }}">
+      <input type="file" name="file" accept="image/*" required class="small">
+      <div class="row"><button class="btn sm primary">{{ 'Заменить' if s.url else 'Загрузить' }}</button></div></form>
+    {% if s.url %}<form method="post" action="{{ url_for('admin.asset_delete') }}" style="margin-top:6px">{{ csrf() }}
+      <input type="hidden" name="kind" value="{{ s.kind }}"><input type="hidden" name="name" value="{{ s.name }}"><button class="btn sm danger">Удалить</button></form>{% endif %}
+  </div>
+{% endif %}{% endfor %}
+</div>
+<h2>Дополнительные варианты настроения</h2>
+<p class="muted small">Пока файла нет, используется основной файл персонажа. Чтобы загрузить вариант вручную, положите в папку <code>characters</code> файл вида <code>идентификатор_настроение.png</code> (настроения: angry, sad, happy).</p>
+{% endblock %}

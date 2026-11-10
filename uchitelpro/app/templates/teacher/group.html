@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}{{ grp.name }}{% endblock %}
+{% block body %}
+<h1>Группа {{ grp.name }}</h1>
+<h2>Студенты</h2>
+<div class="tablewrap"><table>
+<tr><th>ФИО</th><th>Кейсов</th><th>Средний</th><th>XP</th><th>Часы</th>{% for c in cases %}<th title="{{ c.title }}">{{ c.title[:18] }}…</th>{% endfor %}</tr>
+{% for s in students %}<tr><td><a href="{{ url_for('teacher.student', uid=s.id) }}">{{ s.full_name }}</a></td><td>{{ s.done }}</td><td>{{ s.avg|pct }}</td><td>{{ s.xp }}</td><td>{{ '%g'|format(s.hours) }}</td>
+  {% for c in cases %}<td>{{ matrix.get((s.id, c.id))|pct if matrix.get((s.id, c.id)) is not none else '—' }}</td>{% endfor %}</tr>
+{% else %}<tr><td colspan="9" class="muted">В группе нет студентов.</td></tr>{% endfor %}</table></div>
+
+<h2>Назначения</h2>
+<div class="grid g2">
+<div class="card"><h3>Назначить кейс группе</h3>
+<form method="post" action="{{ url_for('teacher.assign', gid=grp.id) }}">{{ csrf() }}
+  <label>Кейс</label><select name="case_id">{% for c in cases %}<option value="{{ c.id }}">{{ c.title }}</option>{% endfor %}</select>
+  <label>Срок (необязательно)</label><input type="date" name="due_at">
+  <p><button class="btn primary">Назначить</button></p></form></div>
+<div>{% for a in assigned %}<div class="card row sp" style="margin-bottom:8px"><span>{{ a.title }}<br><span class="muted small">срок: {{ a.due_at|d }}</span></span>
+  <form method="post" action="{{ url_for('teacher.unassign', gid=grp.id, aid=a.id) }}">{{ csrf() }}<button class="btn sm danger">Снять</button></form></div>
+{% else %}<p class="muted">Назначений нет.</p>{% endfor %}</div></div>
+{% endblock %}

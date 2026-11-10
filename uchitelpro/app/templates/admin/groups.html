@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Группы{% endblock %}
+{% block body %}
+<h1>Учебные группы</h1>
+<div class="card"><form method="post" class="row">{{ csrf() }}
+  <input type="text" name="name" placeholder="Название, например ПО-11" class="inline" style="width:220px" required>
+  <input type="number" name="course" min="1" max="6" value="1" class="inline" style="width:80px" title="Курс">
+  <select name="teacher_id" class="inline" style="width:220px"><option value="">Куратор не назначен</option>{% for t in teachers %}<option value="{{ t.id }}">{{ t.full_name }}</option>{% endfor %}</select>
+  <button class="btn primary">Создать группу</button></form></div>
+<div class="tablewrap" style="margin-top:14px"><table><tr><th>Группа</th><th>Курс</th><th>Студентов</th><th>Куратор</th></tr>
+{% for r in rows %}<tr><td>{{ r.name }}</td><td>{{ r.course }}</td><td>{{ r.n }}</td><td>
+<form method="post" action="{{ url_for('admin.set_teacher', gid=r.id) }}" class="row">{{ csrf() }}
+<select name="teacher_id" class="inline" style="width:220px"><option value="">—</option>{% for t in teachers %}<option value="{{ t.id }}" {{ 'selected' if t.id == r.teacher_id }}>{{ t.full_name }}</option>{% endfor %}</select>
+<button class="btn sm">Сохранить</button></form></td></tr>{% endfor %}</table></div>
+{% endblock %}

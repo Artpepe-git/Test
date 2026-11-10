@@ -1,0 +1,11 @@
+{
+  "name": "УчительPRO",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12",
+  "postCreateCommand": "pip install -r uchitelpro/requirements.txt segno",
+  "postStartCommand": "bash uchitelpro/scripts/codespace_start.sh",
+  "forwardPorts": [8765],
+  "portsAttributes": {
+    "8765": { "label": "УчительPRO", "onAutoForward": "openPreview", "visibility": "public" }
+  },
+  "customizations": { "vscode": { "extensions": ["ms-python.python"] } }
+}

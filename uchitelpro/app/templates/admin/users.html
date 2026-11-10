@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Пользователи{% endblock %}
+{% block body %}
+<h1>Пользователи</h1>
+<div class="grid g2">
+<div class="card"><h3>Новый пользователь</h3>
+<form method="post" action="{{ url_for('admin.create_user') }}">{{ csrf() }}
+  <label>ФИО</label><input type="text" name="full_name" required>
+  <label>Логин</label><input type="text" name="login" required minlength="3">
+  <label>Роль</label><select name="role">{% for r in roles %}<option value="{{ r }}">{{ ROLE_TITLES[r] }}</option>{% endfor %}</select>
+  <label>Группа (для студента)</label><select name="group_id"><option value="">—</option>{% for gr in groups %}<option value="{{ gr.id }}">{{ gr.name }}</option>{% endfor %}</select>
+  <p><button class="btn primary">Создать</button></p></form></div>
+<div class="card"><h3>Импорт студентов</h3>
+<form method="post" action="{{ url_for('admin.import_students') }}">{{ csrf() }}
+  <p class="small muted">По одному в строке: <code>ФИО;логин;группа</code>. Недостающие группы создаются. Временные пароли показываются один раз.</p>
+  <textarea name="lines" placeholder="Иванова Анна Сергеевна;ivanova;ПО-11"></textarea>
+  <p><button class="btn primary">Импортировать</button></p></form></div>
+</div>
+<h2>Все пользователи</h2>
+<div class="tablewrap"><table><tr><th>ФИО / логин</th><th>Роль</th><th>Группа</th><th>Статус</th><th>Действия</th></tr>
+{% for u in rows %}<tr><td>
+<form method="post" action="{{ url_for('admin.update_user', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="profile">
+  <input type="text" name="full_name" value="{{ u.full_name }}"><span class="muted small">{{ u.login }}{% if u.is_demo %} · демо{% endif %}</span></td>
+<td><select name="role">{% for r in roles %}<option value="{{ r }}" {{ 'selected' if r == u.role }}>{{ ROLE_TITLES[r] }}</option>{% endfor %}</select></td>
+<td><select name="group_id"><option value="">—</option>{% for gr in groups %}<option value="{{ gr.id }}" {{ 'selected' if gr.id == u.group_id }}>{{ gr.name }}</option>{% endfor %}</select></td>
+<td>{% if u.is_active %}<span class="badge ok">активен</span>{% else %}<span class="badge gray">отключён</span>{% endif %}{% if u.must_change %}<br><span class="small muted">нужна смена пароля</span>{% endif %}</td>
+<td class="row"><button class="btn sm">Сохранить</button></form>
+<form method="post" action="{{ url_for('admin.update_user', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="reset"><button class="btn sm">Сбросить пароль</button></form>
+<form method="post" action="{{ url_for('admin.update_user', uid=u.id) }}">{{ csrf() }}<input type="hidden" name="action" value="{{ 'deactivate' if u.is_active else 'activate' }}">
+  <button class="btn sm {{ 'danger' if u.is_active }}">{{ 'Отключить' if u.is_active else 'Включить' }}</button></form></td></tr>{% endfor %}</table></div>
+{% endblock %}

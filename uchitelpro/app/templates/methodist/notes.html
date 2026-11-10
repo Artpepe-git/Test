@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Заметки{% endblock %}
+{% block body %}
+<h1>Полевые заметки студентов</h1>
+{% for n in rows %}<div class="card" style="margin-bottom:12px">
+  <div class="row sp"><b>{{ n.full_name }}</b><span class="small muted">{{ n.created_at|dt }} ·
+   {% if n.status == 'submitted' %}<span class="badge warn">на проверке</span>{% elif n.status == 'accepted' %}<span class="badge ok">принята</span>
+   {% elif n.status == 'converted' %}<span class="badge ok">кейс №{{ n.case_id }}</span>{% else %}<span class="badge bad">отклонена</span>{% endif %}</span></div>
+  <p><b>Ситуация:</b> {{ n.situation }}</p><p><b>Действия:</b> {{ n.action }}</p><p><b>Результат:</b> {{ n.result }}</p>
+  {% if n.lesson %}<p><b>Вывод:</b> {{ n.lesson }}</p>{% endif %}
+  {% if n.reviewer_comment %}<p class="small muted">Комментарий: {{ n.reviewer_comment }}</p>{% endif %}
+  {% if n.status in ('submitted', 'accepted') %}
+  <form method="post" action="{{ url_for('methodist.decide_note', nid=n.id) }}">{{ csrf() }}
+    <input type="text" name="comment" placeholder="Комментарий студенту (обязателен при отклонении)" style="margin-bottom:8px">
+    {% if n.status == 'submitted' %}<button class="btn sm primary" name="decision" value="accept">Принять</button>
+    <button class="btn sm danger" name="decision" value="reject">Отклонить</button>{% endif %}
+    <button class="btn sm" name="decision" value="convert">Создать черновик кейса</button></form>{% endif %}
+</div>{% else %}<p class="muted">Заметок нет.</p>{% endfor %}
+{% endblock %}

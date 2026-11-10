@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Смены{% endblock %}
+{% block body %}
+<h1>Волонтёрские смены</h1>
+<div class="tablewrap"><table><tr><th>Студент</th><th>Смена</th><th>Описание</th><th>Решение</th></tr>
+{% for s in rows %}<tr><td>{{ s.full_name }}<br><span class="muted small">{{ s.group_name }}</span></td>
+<td>{{ s.shift_date|d }}<br>{{ s.place }}<br><span class="muted small">{{ s.form }} · {{ '%g'|format(s.hours) }} ч</span></td>
+<td class="small">{{ s.description or '—' }}</td>
+<td>{% if s.status == 'pending' %}
+  <form method="post" action="{{ url_for('teacher.decide_shift', sid=s.id) }}">{{ csrf() }}
+    <input type="text" name="comment" placeholder="Комментарий (обязателен при отказе)" style="margin-bottom:6px">
+    <button class="btn sm primary" name="decision" value="approve">Подтвердить</button>
+    <button class="btn sm danger" name="decision" value="reject">Отклонить</button></form>
+  {% elif s.status == 'approved' %}<span class="badge ok">подтверждена</span> <span class="small muted">{{ s.confirm_comment }}</span>
+  {% else %}<span class="badge bad">отклонена</span> <span class="small muted">{{ s.confirm_comment }}</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="muted">Смен нет.</td></tr>{% endfor %}</table></div>
+{% endblock %}

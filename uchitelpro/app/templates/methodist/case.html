@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% from "_m.html" import rating_badge, outcome_badge, bar, icon with context %}
+{% block title %}{{ c.title }}{% endblock %}
+{% block body %}
+<div class="row sp"><div><h1>{{ c.title }}</h1><div class="muted">{{ c.category }}</div></div>
+<a class="btn" href="{{ url_for('methodist.print_case', cid=c.id) }}" target="_blank">Печатная версия</a> <a class="btn primary" href="{{ url_for('methodist.edit', cid=c.id) }}">Редактор</a></div>
+{% if ana %}
+<div class="grid g3" style="margin-top:12px">
+  <div class="card"><div class="muted small">Узлов / выборов</div><div class="kpi">{{ ana.nodes_count }} / {{ ana.choices_count }}</div></div>
+  <div class="card"><div class="muted small">Различных путей</div><div class="kpi">{{ ana.path_count }}</div></div>
+  <div class="card"><div class="muted small">Баллы: от … до</div><div class="kpi">{{ ana.worst_total }} … {{ ana.best_total }}</div></div>
+</div>
+<h2>Концовки</h2>
+<div class="tablewrap"><table><tr><th>Финал</th><th>Прохождений</th><th>Средний результат</th></tr>
+{% for f in finals %}<tr><td>{{ f.final_node }}</td><td>{{ f.n }}</td><td>{{ f.avg|pct }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Зачётных прохождений пока нет.</td></tr>{% endfor %}</table></div>
+<h2>Что выбирают студенты</h2>
+{% for n in node_stats %}<div class="card" style="margin-bottom:10px"><b>{{ n.id }}</b> <span class="muted small">— {{ n.text[:140] }}{% if n.text|length > 140 %}…{% endif %} (ответов: {{ n.total }})</span>
+{% for ch in n.choices %}<div style="margin-top:8px"><div class="row sp small"><span>{{ ch.id }}. {{ ch.text[:90] }}</span><span class="muted small" title="в скольких состояниях выбор оптимален / приемлем / слаб / закрыт">{% if ch.gated %}{{ icon('lock', 14) }} {% endif %}опт {{ ch.r.best }} · прием {{ ch.r.good }} · слаб {{ ch.r.weak }}{% if ch.r.locked %} · закр {{ ch.r.locked }}{% endif %}</span> <b>{{ ch.n }}{% if n.total %} · {{ (ch.n * 100 / n.total)|round|int }}%{% endif %}</b></div>
+{{ bar((ch.n * 100 / n.total) if n.total else 0) }}</div>{% endfor %}</div>{% endfor %}
+<h2>Версии</h2><ul>{% for v in versions %}<li>версия {{ v.version }} — {{ v.published_at|dt }}</li>{% endfor %}</ul>
+{% else %}<p class="muted">Кейс ещё не опубликован.</p>{% endif %}
+{% endblock %}

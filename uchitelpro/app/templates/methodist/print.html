@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ 'Ключ преподавателя' if key else 'Карточки' }}: {{ c.title }}</title>
+<style>
+@page { size: A4; margin: 10mm; }
+:root { --ink:#0b1f14; --muted:#4f6b5a; --g:#0f7a41; --gd:#0b5a30; --soft:#eaf7ef; --line:#bfe3cc; --warn:#fff6e3; --warnl:#e0a83a; }
+* { box-sizing: border-box; }
+body { margin:0; font: 11pt/1.45 Arial, "Segoe UI", sans-serif; color: var(--ink); background:#fff; }
+.bar { position: sticky; top:0; background:#f4fbf7; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.bar a, .bar button { font: inherit; padding:7px 14px; border:1px solid var(--g); background:#fff; color:var(--gd); border-radius:8px; text-decoration:none; cursor:pointer; }
+.bar .on { background:var(--g); color:#fff; } .bar span { color:var(--muted); font-size:10pt; }
+main { max-width: 190mm; margin: 0 auto; padding: 12px 0 30px; }
+h1 { font-size: 20pt; margin: 4px 0 2px; } h2 { font-size: 14pt; margin: 14px 0 6px; color: var(--gd); }
+.sub { color: var(--muted); margin: 0 0 10px; }
+.sheet { break-after: page; font-size:10pt; } .sheet h2 { margin: 10px 0 4px; } .sheet ol { margin: 4px 0; padding-left: 20px; } .sheet .scale { margin: 3px 0 4px; } .sheet .box { margin: 6px 0; padding: 5px 10px; } .sheet .chk span { font-size:10pt; }
+.box { border:1px solid var(--line); border-radius:8px; padding:8px 12px; margin:8px 0; background:var(--soft); }
+.card { border:1.5px solid var(--g); border-radius:10px; padding:10px 14px 12px; margin: 0 0 6mm; break-inside: avoid; position:relative; }
+.card + .card { }
+.cut { border-top: 1px dashed #9aa; margin: 0 0 6mm; }
+.head { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.no { background: var(--soft); border:2px solid var(--g); color:var(--gd); font-weight:700; font-size:16pt; min-width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0 6px; }
+.kind { font-size:8.5pt; letter-spacing:.1em; text-transform:uppercase; color:var(--g); font-weight:700; }
+.title { font-weight:700; font-size:13pt; }
+.text { margin: 4px 0 8px; font-size:11.5pt; }
+.enter { background:var(--warn); border-left:3px solid var(--warnl); padding:4px 10px; margin:4px 0 8px; font-size:10pt; }
+.ch { margin: 6px 0 0; padding: 6px 10px; border-left:3px solid var(--g); background:#fafdfb; }
+.ch .t { font-weight:600; } .go { font-weight:700; color:var(--gd); white-space:nowrap; }
+.ch .m { font-size:9.5pt; color:var(--muted); margin-top:2px; }
+.lock { font-size:9.5pt; background:var(--warn); border-left:3px solid var(--warnl); padding:3px 8px; margin-top:4px; }
+.rule { margin:4px 0; padding:4px 10px; border-left:3px solid var(--g); background:#fafdfb; }
+.end { margin-top:8px; padding:6px 10px; background:var(--soft); border-radius:8px; font-weight:700; color:var(--gd); }
+table { border-collapse: collapse; width:100%; } td, th { border:1px solid var(--line); padding:4px 8px; vertical-align: top; text-align:left; font-size:10pt; }
+th { background:var(--soft); }
+.scale { display:flex; align-items:center; gap:0; margin:6px 0 10px; } .scale b { min-width:140px; }
+.scale i { width:26px; height:26px; border:1.5px solid var(--g); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-style:normal; font-size:10pt; margin-right:6px; }
+.scale i.z { background: var(--soft); font-weight:700; }
+.chk { display:grid; grid-template-columns: 1fr 1fr; gap:5px 16px; } .chk span::before { content:"\25A2  "; color:var(--g); font-size:13pt; }
+.fb { color:var(--muted); font-size:9.5pt; } .rb { font-weight:700; } .rb.best { color:#0f7a41; } .rb.good { color:#8a6d00; } .rb.weak { color:#a33; }
+@media print { .bar { display:none; } main { max-width:none; padding:0; } }
+</style></head><body>
+<div class="bar"><button onclick="window.print()">Печать</button>
+{% if key %}<a href="{{ url_for('methodist.print_case', cid=c.id) }}">Карточки для игроков</a><a class="on" href="#">Ключ преподавателя</a>
+{% else %}<a class="on" href="#">Карточки для игроков</a><a href="{{ url_for('methodist.print_case', cid=c.id, part='key') }}">Ключ преподавателя</a>{% endif %}
+<span>Формат A4, поля 10 мм. Карточки идут подряд, режьте по пунктирным линиям. Ключ не раздавайте игрокам.</span></div>
+<main>
+{% if not key %}
+<section class="sheet">
+  <h1>{{ c.title }}</h1>
+  <p class="sub">Настольная версия кейса: {{ d.n }} карточек, играют по одному или командой. Время: {{ c.duration_min }} мин.</p>
+  <h2>Как играть</h2>
+  <ol>
+    <li>Возьмите карточку №1 и прочитайте ситуацию вслух.</li>
+    <li>Выберите вариант действия. Внизу варианта указано, на какую карточку перейти.</li>
+    <li>Если под вариантом есть строка «Лист игрока», внесите изменение в свой лист: сдвиньте шкалу или отметьте пометку.</li>
+    <li>Некоторые варианты доступны только при условии: сверьтесь с листом. Если условие не выполнено, вариант выбрать нельзя.</li>
+    <li>На карточке «Развилка» ничего выбирать не нужно: проверьте условия сверху вниз и перейдите на первую подходящую.</li>
+    <li>Записывайте в маршрут номер каждой карточки и букву выбранного варианта. Игра заканчивается на карточке «Концовка».</li>
+  </ol>
+  <div class="box">Шкалы нельзя опустить ниже −3 и поднять выше +3. Все шкалы в начале игры стоят на нуле, пометок нет.</div>
+  <h2>Лист игрока</h2>
+  {% for m in d.meters %}<div class="scale"><b>{{ m.title }}</b>{% for v in range(m.min, m.max + 1) %}<i class="{{ 'z' if v == m.start else '' }}">{{ v if v <= 0 else '+' ~ v }}</i>{% endfor %}</div>{% endfor %}
+  
+  {% if d.flags %}<h2>Пометки</h2><div class="chk">{% for f in d.flags %}<span>{{ f }}</span>{% endfor %}</div>{% endif %}
+  <h2>Маршрут</h2>
+  <table><tr><th>№ карточки</th><th>Выбор (буква)</th><th>№ карточки</th><th>Выбор (буква)</th><th>№ карточки</th><th>Выбор (буква)</th></tr>
+  {% for i in range(4) %}<tr>{% for j in range(6) %}<td style="padding:7px 8px">&nbsp;</td>{% endfor %}</tr>{% endfor %}</table>
+</section>
+{% for cd in d.cards %}
+<article class="card">
+  <div class="head"><div class="no">{{ cd.num }}</div><div>
+    <div class="kind">{{ {'scene': 'Ситуация', 'cut': 'Продолжение', 'router': 'Развилка', 'final': 'Концовка'}[cd.kind] }}</div>
+    {% if cd.kind == 'final' and cd.title %}<div class="title">{{ cd.title }}</div>{% endif %}</div></div>
+  {% if cd.enter %}<div class="enter"><b>Лист игрока:</b> {{ cd.enter }}</div>{% endif %}
+  {% if cd.kind == 'router' %}<div class="text">Ничего выбирать не нужно. Проверьте по листу игрока, сверху вниз:</div>{% else %}<div class="text">{{ cd.text }}</div>{% endif %}
+  {% if cd.kind == 'scene' %}
+    {% for ch in cd.choices %}<div class="ch"><div><span class="t">{{ 'абвгдежз'[loop.index0] }}) {{ ch.text }}</span> <span class="go">→ карточка {{ ch.to }}</span></div>
+      {% if ch.changes %}<div class="m">Лист игрока: {{ ch.changes }}</div>{% endif %}
+      {% if ch.requires %}<div class="lock">Можно выбрать, только если: {{ ch.requires }}.{% if ch.hint %} Иначе вариант закрыт. {{ ch.hint }}{% endif %}</div>{% endif %}</div>{% endfor %}
+  {% elif cd.kind in ('cut', 'router') %}
+    {% for r in cd.rules %}<div class="rule">{% if r['if'] %}Если {{ r['if'] }}{% else %}{{ 'Иначе' if cd.rules|length > 1 else 'Далее' }}{% endif %} → <span class="go">карточка {{ r.to }}</span>{% if r.changes %}<div class="m">Лист игрока: {{ r.changes }}</div>{% endif %}</div>{% endfor %}
+  {% else %}<div class="end">Игра окончена. Запишите номер этой карточки: {{ cd.num }}.</div>{% endif %}
+</article><div class="cut"></div>
+{% endfor %}
+{% else %}
+<h1>Ключ преподавателя</h1>
+<p class="sub">{{ c.title }} · только для ведущего. Лучший возможный путь: {% for n in d.golden %}{{ n }}{{ ' → ' if not loop.last }}{% endfor %}, максимум {{ d.best_total }} б. (с бонусом концовки).</p>
+<p>Как оценивать: по маршруту игрока сложите баллы выбранных вариантов (колонка «Баллы»), добавьте бонус концовки. Колонка «Оценка» показывает, насколько вариант силён в своём контексте. Баллы по компетенциям: {% for k, v in d.comps.items() %}{{ k }} — {{ v }}{{ '; ' if not loop.last }}{% endfor %}.</p>
+{% for cd in d.cards %}{% if cd.kind != 'router' %}
+<table style="margin-bottom:10px; break-inside: avoid">
+<tr><th style="width:60px">№ {{ cd.num }}</th><th colspan="4">{{ ('Концовка: ' ~ cd.title) if cd.kind == 'final' else (cd.text[:90] ~ ('…' if cd.text|length > 90 else '')) }}</th></tr>
+{% if cd.kind == 'scene' %}<tr><th></th><th>Вариант</th><th style="width:60px">Баллы</th><th style="width:70px">Оценка</th><th>Почему</th></tr>
+{% for ch in cd.choices %}<tr><td>{{ 'абвгдежз'[loop.index0] }} → {{ ch.to }}</td><td>{{ ch.text }}</td><td><b>{{ ch.score }}</b></td><td class="rb {{ ch.rating }}">{{ {'best':'лучший','good':'хороший','weak':'слабый'}[ch.rating] }}</td><td class="fb">{{ ch.feedback }}</td></tr>{% endfor %}
+{% elif cd.kind == 'final' %}<tr><td></td><td colspan="4">Исход: {{ {'success':'успех','partial':'частично','fail':'неудача'}.get(cd.outcome, cd.outcome) }}. Бонус за концовку: +{{ cd.bonus }} б.{% if review.final_notes and review.final_notes.get(cd.id) %}<br><span class="fb">{{ review.final_notes[cd.id] }}</span>{% endif %}</td></tr>
+{% else %}<tr><td></td><td colspan="4" class="fb">Пауза: баллов нет, переход по правилам на карточке.</td></tr>{% endif %}
+</table>{% endif %}{% endfor %}
+{% endif %}
+</main></body></html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Вход{% endblock %}
+{% block body %}
+{% set mascot = asset_url('ui', 'mascot') %}
+<div class="card login">
+  {% if mascot %}<img src="{{ mascot }}" alt="" style="max-height:120px;display:block;margin:0 auto 8px">
+  {% else %}<div class="slot empty small muted" style="text-align:center;margin-bottom:10px">Контейнер: талисман платформы (ui/mascot)</div>{% endif %}
+  <h1>Вход в {{ APP_NAME }}</h1>
+  <form method="post">{{ csrf() }}
+    <label for="login">Логин</label><input id="login" type="text" name="login" autofocus autocomplete="username" required>
+    <label for="pw">Пароль</label><input id="pw" type="password" name="password" autocomplete="current-password" required>
+    <p><button class="btn primary" style="width:100%">Войти</button></p>
+  </form>
+  {% if demo %}
+  <details class="small muted"><summary>Демо-доступ</summary>
+    <p>Роли: <code>student1</code> / <code>stud123</code>, <code>teacher</code> / <code>teach123</code>,
+    <code>methodist</code> / <code>method123</code>, <code>admin</code> / <code>admin</code> (при первом входе пароль нужно сменить).
+    Демо-записи отключаются в разделе «Пользователи».</p></details>
+  {% endif %}
+</div>
+{% endblock %}

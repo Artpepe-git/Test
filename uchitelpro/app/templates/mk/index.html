@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_m.html" import icon with context %}
+{% block title %}Мастер-классы{% endblock %}
+{% block body %}
+<h1>Мастер-классы</h1>
+<p class="muted">Готовые сценарии с таймингом: можно открыть здесь или скачать файл Word.</p>
+<div class="grid mkgrid">
+{% for m in items %}
+<article class="card mkcard">
+  <div class="row"><span class="badge">{{ m.tag }}</span>{% if 'student' not in m.roles %}<span class="badge gray" title="Видят преподаватели, методисты и администраторы">для преподавателей</span>{% endif %}</div>
+  <h3>{{ m.title }}</h3>
+  <p class="muted">{{ m.subtitle }}</p>
+  <div class="mkmeta small muted">{{ icon('clock', 15) }} {{ m.total_min }} мин · {{ m.blocks|length }} {{ 'блок' if m.blocks|length == 1 else ('блока' if m.blocks|length < 5 else 'блоков') }}</div>
+  <div class="row"><a class="btn" href="{{ url_for('mk.show', slug=m.slug) }}">Открыть</a>
+  <a class="btn sm" href="{{ url_for('mk.download', slug=m.slug) }}">Скачать .docx</a></div>
+</article>
+{% else %}<p class="muted">Пока нет доступных мастер-классов.</p>{% endfor %}
+</div>
+{% endblock %}

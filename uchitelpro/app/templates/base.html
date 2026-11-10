@@ -1,0 +1,52 @@
+{% from "_m.html" import icon with context %}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ APP_NAME }}{% endblock %} · {{ APP_NAME }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<script>try{var t=localStorage.getItem("volna-theme");if(t==="green")document.documentElement.setAttribute("data-theme","green")}catch(e){}</script>
+</head>
+<body>
+{% macro nav(endpoint, label, prefix=None) -%}
+  <a href="{{ url_for(endpoint) }}" class="{{ 'on' if request.endpoint == endpoint or (prefix and request.endpoint and request.endpoint.startswith(prefix)) }}">{{ label }}</a>
+{%- endmacro %}
+<header class="topbar"><div class="wrap">
+  {% set logo = asset_url('ui', 'logo') %}
+  <a class="brand" href="{{ url_for('auth.index') }}">{% if logo %}<img src="{{ logo }}" alt="">{% endif %}{{ APP_NAME }}</a>
+  {% if g.user %}
+  <nav class="nav">
+    {% if g.user.role == 'student' %}
+      {{ nav('student.home', 'Главная') }}{{ nav('student.cases', 'Кейсы') }}{{ nav('mk.index', 'МК', 'mk.') }}{{ nav('student.volunteer', 'Волонтёрство') }}
+      {{ nav('student.notes', 'Заметки') }}{{ nav('student.profile', 'Профиль') }}{{ nav('common.portfolio', 'Портфолио') }}
+    {% elif g.user.role == 'teacher' %}
+      {{ nav('teacher.home', 'Группы') }}{{ nav('teacher.shifts', 'Смены') }}{{ nav('student.cases', 'Кейсы (тренировка)') }}{{ nav('mk.index', 'МК', 'mk.') }}
+    {% elif g.user.role == 'methodist' %}
+      {{ nav('methodist.home', 'Кейсы') }}{{ nav('methodist.notes', 'Заметки') }}{{ nav('mk.index', 'МК', 'mk.') }}{{ nav('admin.assets', 'Графика') }}
+      {{ nav('student.cases', 'Каталог') }}
+    {% elif g.user.role == 'admin' %}
+      {{ nav('admin.home', 'Обзор') }}{{ nav('admin.users', 'Пользователи') }}{{ nav('admin.groups', 'Группы') }}{{ nav('mk.index', 'МК', 'mk.') }}
+      {{ nav('admin.assets', 'Графика') }}{{ nav('methodist.home', 'Кейсы') }}{{ nav('admin.backup', 'Копии') }}{{ nav('admin.audit', 'Журнал') }}
+    {% endif %}
+  </nav>
+  <div class="userbox">
+    {% if prog %}<span class="xpchip" title="Опыт">ур. {{ prog.level }} · {{ prog.xp }} XP</span>{% endif %}
+    <span><a href="{{ url_for('auth.password') }}">{{ g.user.full_name }}</a> <span class="muted small">· {{ ROLE_TITLES[g.user.role] }}</span></span>
+    <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="_csrf" value="{{ csrf_token }}">
+      <button class="btn sm">Выйти</button></form>
+  </div>
+  {% endif %}
+  <span class="clock" id="clock" aria-label="Дата и время"></span>
+  <button class="themebtn" id="theme" type="button" title="Сменить тему: синяя / зелёная" aria-label="Сменить тему">{{ icon('theme', 16) }}</button>
+</div></header>
+<main class="wrap">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in msgs %}<div class="flash {{ cat }}" role="status">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block body %}{% endblock %}
+</main>
+<script src="{{ url_for('static', filename='js/volna.js') }}"></script>
+</body>
+</html>

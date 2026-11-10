@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_m.html" import bar, profile_bars, badge_icon with context %}
+{% block title %}Профиль{% endblock %}
+{% block body %}
+<h1>Профиль</h1>
+<div class="card" style="margin-top:12px"><div class="row sp"><b style="font-size:1.4rem">Уровень {{ prog.level }}</b><span class="muted">{{ prog.xp }} XP</span></div>
+  {{ bar(prog.pct) }}<p class="small muted">До уровня {{ prog.level + 1 }} осталось {{ prog.hi - prog.xp }} XP.</p></div>
+<div class="grid g2"><div><h2>Компетенции</h2><div class="card">{{ profile_bars(competencies) }}</div></div>
+<div><h2>История XP</h2>
+{% if events %}<div class="tablewrap"><table><tr><th>Дата</th><th>XP</th><th>За что</th></tr>
+{% for e in events %}<tr><td>{{ e.created_at|dt }}</td><td><b>{{ '%+d'|format(e.xp) }}</b></td><td>{{ e.note }}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">Пока пусто.</p>{% endif %}</div></div>
+<h2>Значки</h2>
+<div class="grid g3">{% for b in badges %}<div class="card badgebox {{ '' if got.get(b.code) else 'locked' }}"><div class="ic">{{ badge_icon(b.code, 34) }}</div>
+  <b>{{ b.title }}</b><div class="small muted">{{ b.description }}</div>{% if got.get(b.code) %}<div class="small">{{ got[b.code]|d }}</div>{% endif %}</div>{% endfor %}</div>
+{% endblock %}

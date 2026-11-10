@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Удаление кейса{% endblock %}
+{% block body %}
+<h1>Удалить кейс «{{ c.title }}»?</h1>
+<div class="card" style="max-width:640px">
+  <p>Кейс будет удалён вместе со всеми версиями. Это действие нельзя отменить.</p>
+  <ul>
+    <li>Прохождений студентов, которые исчезнут: <b>{{ n_att }}</b> (студентов: {{ n_stu }})</li>
+    <li>Назначений группам и студентам: <b>{{ n_asg }}</b></li>
+  </ul>
+  {% if n_att %}<p class="muted small">Уже начисленные баллы опыта и значки студентов останутся. Если хотите просто убрать кейс из каталога, лучше отправьте его «В архив».</p>{% endif %}
+  <form method="post" class="row">{{ csrf() }}<input type="hidden" name="confirm" value="yes">
+    <button class="btn danger">Да, удалить навсегда</button>
+    <a class="btn" href="{{ url_for('methodist.home') }}">Отмена</a>
+  </form>
+</div>
+{% endblock %}

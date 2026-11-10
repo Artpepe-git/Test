@@ -1,0 +1,82 @@
+{% extends "base.html" %}{% from "_m.html" import stars, bar, outcome_badge, rating_badge, scene with context %}
+{% block title %}Результат{% endblock %}
+{% block body %}
+{% set s = rep.summary %}
+<div class="row sp"><div>
+  <h1>{{ att.title }}</h1>
+  <div class="muted">{{ owner.full_name }} · {{ att.finished_at|dt }}{% if att.practice %} · <span class="badge gray">тренировка</span>{% endif %}</div>
+</div>
+<div class="noprint"><a class="btn" href="{{ url_for('student.case', cid=att.case_id) }}">К кейсу</a>
+<button class="btn" onclick="window.print()">Печать</button></div></div>
+
+<div class="grid g3" style="margin-top:14px">
+  <div class="card"><div class="muted small">Исход</div><div style="margin:4px 0">{{ outcome_badge(s.outcome) }}</div>
+    <div class="muted small">{{ rep.final.title }}</div></div>
+  <div class="card"><div class="muted small">Баллы</div><div class="kpi">{{ s.earned }} <span class="muted small">из {{ s.best_total }}</span></div>
+    {{ bar((s.pct*100)|round, 'ok') }}</div>
+  <div class="card"><div class="muted small">Оценка</div><div class="kpi">{{ stars(s.stars) }}</div>
+    <div class="small muted">{{ (s.pct*100)|round|int }}% от максимума{% if not att.practice %} · +{{ att.xp_awarded }} XP{% endif %}</div></div>
+</div>
+
+<div class="card" style="margin-top:14px"><h3>{{ rep.final.title }}</h3><p>{{ rep.final.text }}</p>
+  {% if rep.final_note %}<p class="muted small"><b>Комментарий методиста:</b> {{ rep.final_note }}</p>{% endif %}</div>
+
+<h2>Компетенции</h2>
+<div class="card stack">
+  {% for c in s.competencies %}
+    <div><div class="row sp small"><span>{{ rep.comp_titles.get(c.code, c.code) }}</span>
+      <b>{{ c.earned }} / {{ c.max }}{% if c.pct is not none %} · {{ c.pct }}%{% endif %}</b></div>{{ bar(c.pct) }}</div>
+  {% endfor %}
+</div>
+
+{% if s.meters %}
+<h2>Что происходило между людьми</h2>
+<p class="muted small">Эти шкалы были скрыты во время зачётной попытки. Они показывают, как ваши решения менялись ситуацию шаг за шагом.</p>
+<div class="card stack">
+  {% for m in s.meters %}
+  <div><div class="row sp small"><b>{{ m.title }}</b><span>итог: {{ '%+d'|format(m.value) if m.value else '0' }} (от {{ m.min }} до +{{ m.max }})</span></div>
+    <div class="tl">
+      {% for p in s.path %}{% if p.effects.get(m.code) %}
+      <div class="tl-row"><span class="badge {{ 'ok' if p.effects[m.code] > 0 else 'bad' }}">{{ '%+d'|format(p.effects[m.code]) }}</span>
+        <span class="small">шаг {{ loop.index }}: {{ p.choice_text[:110] }}</span></div>
+      {% endif %}{% endfor %}
+    </div></div>
+  {% endfor %}
+  {% if s.flags %}<div class="small muted">Что вы выяснили/сделали по ходу: {{ s.flags|join(', ') }}</div>{% endif %}
+</div>
+{% endif %}
+
+<h2>Ваш путь</h2>
+<p class="muted small">Оптимально: {{ s.counts.best }} · приемлемо: {{ s.counts.good }} · слабо: {{ s.counts.weak }}</p>
+{% for p in s.path %}
+  <div class="step {{ p.rating }}">
+    <div class="row sp"><b>Шаг {{ loop.index }}</b><span>{{ rating_badge(p.rating) }} <span class="muted small">{{ '%+d'|format(p.points) }} б.</span></span></div>
+    <p class="muted small" style="margin:.3rem 0">{{ p.situation }}</p>
+    <p style="margin:.3rem 0"><b>Вы:</b> {{ p.choice_text }}</p>
+    {% if p.feedback %}<p style="margin:.3rem 0">{{ p.feedback }}</p>{% endif %}
+    {% if p.rating != 'best' %}<p class="small" style="margin:.3rem 0"><b>Оптимально было:</b> {{ p.best_text }}</p>{% endif %}
+    {% if p.note %}<p class="small muted" style="margin:.3rem 0">{{ p.note }}</p>{% endif %}
+  </div>
+{% endfor %}
+
+{% if rep.other_finals %}
+<h2>Какие ещё были концовки</h2>
+<div class="card small">{% for f in rep.other_finals %}<span style="margin-right:12px">{{ outcome_badge(f.outcome) }} {{ f.title }}</span>{% endfor %}</div>
+{% endif %}
+
+<h2>Золотой путь</h2>
+<div class="card">
+  {% for g in rep.golden %}
+    <p><span class="badge ok">{{ loop.index }}</span> <span class="muted small">{{ g.situation }}</span><br><b>{{ g.choice_text }}</b><br><span class="small">{{ g.feedback }}</span></p>
+  {% endfor %}
+</div>
+
+<h2>Теория к кейсу</h2>
+<div class="grid g2">
+  {% for t in rep.review.theory %}<div class="card"><h3>{{ t.title }}</h3><p class="small">{{ t.text }}</p></div>{% endfor %}
+</div>
+{% if rep.review.takeaways %}
+<h2>Главное</h2>
+<div class="card"><ul>{% for t in rep.review.takeaways %}<li>{{ t }}</li>{% endfor %}</ul></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% from "_m.html" import stars, outcome_badge, profile_bars with context %}
+{% block title %}{{ stu.full_name }}{% endblock %}
+{% block body %}
+<div class="row sp"><div><h1>{{ stu.full_name }}</h1><div class="muted">Группа {{ stu.group_name or '—' }} · уровень {{ prog.level }} · {{ prog.xp }} XP</div></div>
+<a class="btn" href="{{ url_for('common.portfolio', uid=stu.id) }}">Портфолио</a></div>
+<div class="grid g2"><div><h2>Компетенции</h2><div class="card">{{ profile_bars(competencies) }}</div></div>
+<div><h2>Волонтёрство</h2>{% for s in shifts %}<div class="card" style="margin-bottom:8px"><div class="row sp"><span>{{ s.shift_date|d }} · {{ s.place }}</span><span class="small">{{ '%g'|format(s.hours) }} ч · {{ s.status }}</span></div></div>
+{% else %}<p class="muted">Нет смен.</p>{% endfor %}</div></div>
+<h2>Попытки</h2>
+<div class="tablewrap"><table><tr><th>Кейс</th><th>Когда</th><th>Режим</th><th>Результат</th><th></th></tr>
+{% for a in attempts %}<tr><td>{{ a.title }}</td><td>{{ a.finished_at|dt }}</td><td>{{ 'тренировка' if a.practice else 'зачёт' }}</td>
+<td>{{ outcome_badge(a.outcome) }} {{ a.score_pct|pct }} {{ stars(a.stars) }}</td><td><a href="{{ url_for('common.result', aid=a.id) }}">Разбор</a></td></tr>
+{% else %}<tr><td colspan="5" class="muted">Попыток нет.</td></tr>{% endfor %}</table></div>
+{% endblock %}

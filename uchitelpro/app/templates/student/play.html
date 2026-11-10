@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% from "_m.html" import csrf, scene, rating_badge, bar, icon with context %}
+{% block title %}{{ case.title }}{% endblock %}
+{% block body %}
+<div class="row sp"><div><span class="muted small">{{ case.title }}{% if att.practice %} · <span class="badge gray">тренировка</span>{% endif %}</span><br>
+  <b>Шаг {{ step_no }}</b></div>
+  <form method="post" action="{{ url_for('student.abandon', aid=att.id) }}" onsubmit="return confirm('Отменить попытку? Прогресс будет потерян.')">{{ csrf() }}
+    <button class="btn sm">Отменить попытку</button></form></div>
+
+{% if last %}
+<div class="feedback {{ last.rating }}" style="margin-top:12px"><b>Предыдущий выбор:</b> {{ rating_badge(last.rating) }}<br>
+  <span class="small muted">{{ last.text if last.text.startswith("«") else "«" ~ last.text ~ "»" }}</span><br>{{ last.feedback }}</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  {{ scene(node, asset_url) }}
+  <div class="dialog" style="border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px">
+    {% if node.speaker %}<div class="who">{{ node.speaker }}</div>{% endif %}
+    <div>{{ node.text }}</div>
+  </div>
+</div>
+
+{% if meters %}
+<div class="card meters" style="margin-top:12px"><div class="muted small" style="margin-bottom:6px">Подсказка тренировки — состояние ситуации (в зачётной попытке скрыто)</div>
+  <div class="grid g3">{% for m in meters %}
+    <div><div class="row sp small"><span>{{ m.title }}</span><b>{{ '%+d'|format(m.value) if m.value else '0' }}</b></div>
+    {{ bar(((m.value - m.min) * 100 / (m.max - m.min))|round) }}</div>{% endfor %}</div></div>
+{% endif %}
+
+<form method="post" action="{{ url_for('student.choose', aid=att.id) }}" id="f" class="choices">{{ csrf() }}
+  <input type="hidden" name="spent" id="spent" value="0">
+  {% for c in node.choices %}
+    {% if c.locked %}
+      <div class="choice locked" aria-disabled="true">{{ icon('lock', 16) }} {{ c.text }}<div class="small muted">{{ c.hint }}</div></div>
+    {% else %}
+      <button class="choice" name="choice" value="{{ c.id }}">{{ c.text }}</button>
+    {% endif %}
+  {% endfor %}
+</form>
+<script>
+  var t0 = Date.now();
+  document.getElementById('f').addEventListener('submit', function () {
+    document.getElementById('spent').value = Math.round((Date.now() - t0) / 1000);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Импорт{% endblock %}
+{% block body %}
+<h1>Результат импорта</h1>
+<div class="flash warn">Пароли показаны <b>один раз</b>: сохраните или распечатайте эту страницу. При первом входе студент обязан сменить пароль.</div>
+<h2>Создано: {{ created|length }}</h2>
+<div class="tablewrap"><table><tr><th>ФИО</th><th>Логин</th><th>Группа</th><th>Временный пароль</th></tr>
+{% for n, l, gr, p in created %}<tr><td>{{ n }}</td><td>{{ l }}</td><td>{{ gr or '—' }}</td><td><code>{{ p }}</code></td></tr>{% endfor %}</table></div>
+{% if skipped %}<h2>Пропущено: {{ skipped|length }}</h2><ul>{% for line, why in skipped %}<li><code>{{ line }}</code> — {{ why }}</li>{% endfor %}</ul>{% endif %}
+<p class="noprint"><button class="btn" onclick="window.print()">Печать</button> <a class="btn" href="{{ url_for('admin.users') }}">К списку</a></p>
+{% endblock %}

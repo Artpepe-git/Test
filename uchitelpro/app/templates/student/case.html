@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% from "_m.html" import stars, outcome_badge, csrf with context %}
+{% block title %}{{ c.title }}{% endblock %}
+{% block body %}
+<span class="badge">{{ c.category }}</span>
+<h1 style="margin-top:6px">{{ c.title }}</h1>
+<p>{{ c.description }}</p>
+<div class="card">
+  <div class="row"><span>Сложность: <b>{{ c.difficulty }}/5</b></span><span>Время: <b>~{{ c.duration_min }} мин</b></span>
+    <span>Решений до финала: <b>{{ ana.golden_path|length }}+</b></span><span>Концовок: <b>{{ ana.finals|length }}</b></span></div>
+  <p class="small muted" style="margin-top:10px">Проверяются компетенции: {% for k, t in comps %}{{ t }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+  <form method="post" action="{{ url_for('student.start', cid=c.id) }}" class="row">{{ csrf() }}
+    {% if g.user.role == 'student' %}
+      <button class="btn primary" name="mode" value="graded">Пройти (зачётная попытка)</button>
+      <button class="btn" name="mode" value="practice">Тренировка с подсказками</button>
+    {% else %}
+      <button class="btn primary" name="mode" value="practice">Пройти в режиме просмотра</button>
+    {% endif %}
+  </form>
+  {% if g.user.role == 'student' %}<p class="small muted">Зачётная попытка начисляет XP; повторные прохождения дают меньше (×0,5, затем ×0,25). Тренировка показывает разбор после каждого шага и XP не даёт.</p>{% endif %}
+</div>
+{% if attempts %}
+<h2>Ваши попытки</h2>
+<div class="tablewrap"><table><tr><th>Начата</th><th>Режим</th><th>Статус</th><th>Результат</th><th></th></tr>
+{% for a in attempts %}<tr><td>{{ a.started_at|dt }}</td><td>{{ 'тренировка' if a.practice else 'зачёт' }}</td>
+  <td>{{ 'завершена' if a.status == 'finished' else 'в процессе' }}</td>
+  <td>{% if a.status == 'finished' %}{{ outcome_badge(a.outcome) }} {{ a.score_pct|pct }} {{ stars(a.stars) }}{% endif %}</td>
+  <td>{% if a.status == 'finished' %}<a href="{{ url_for('common.result', aid=a.id) }}">Разбор</a>{% else %}<a href="{{ url_for('student.play', aid=a.id) }}">Продолжить</a>{% endif %}</td></tr>{% endfor %}</table></div>
+{% endif %}
+{% endblock %}

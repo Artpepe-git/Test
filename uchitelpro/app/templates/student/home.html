@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% from "_m.html" import stars, bar, profile_bars, badge_icon with context %}
+{% block title %}Главная{% endblock %}
+{% block body %}
+<h1>Здравствуйте, {{ g.user.full_name.split()[0] }}!</h1>
+<div class="card" style="margin-top:12px"><div class="row sp"><div><span class="muted small">Уровень</span> <b style="font-size:1.4rem">{{ prog.level }}</b></div>
+  <span class="muted small">{{ prog.xp }} / {{ prog.hi }} XP до следующего уровня</span></div>{{ bar(prog.pct) }}</div>
+
+{% if pending %}
+<h2>Незавершённые попытки</h2>
+{% for a in pending %}<div class="card row sp" style="margin-bottom:8px"><span>{{ a.title }} {% if a.practice %}<span class="badge gray">тренировка</span>{% endif %}</span>
+  <a class="btn primary sm" href="{{ url_for('student.play', aid=a.id) }}">Продолжить</a></div>{% endfor %}
+{% endif %}
+
+<h2>Задания от преподавателя</h2>
+{% if assigned %}
+<div class="grid g2">{% for a in assigned %}
+  <div class="card"><h3>{{ a.title }}</h3><div class="muted small">{{ a.category }} · сложность {{ a.difficulty }}/5{% if a.due_at %} · срок {{ a.due_at|d }}{% endif %}</div>
+  <div class="row sp" style="margin-top:10px">{% if a.best is not none %}<span class="badge ok">лучший: {{ a.best|pct }}</span>{% else %}<span class="badge warn">не пройден</span>{% endif %}
+  <a class="btn primary sm" href="{{ url_for('student.case', cid=a.case_id) }}">Открыть</a></div></div>{% endfor %}</div>
+{% else %}<p class="muted">Заданий пока нет. Выберите кейс в <a href="{{ url_for('student.cases') }}">каталоге</a>.</p>{% endif %}
+
+<div class="grid g2">
+  <div><h2>Компетенции</h2><div class="card">{{ profile_bars(competencies) }}
+    <p class="small muted">Считается по лучшим зачётным попыткам.</p></div></div>
+  <div><h2>Последние результаты</h2>
+    {% for a in recent %}<div class="card row sp" style="margin-bottom:8px"><span>{{ a.title }}<br><span class="muted small">{{ a.finished_at|dt }}{% if a.practice %} · тренировка{% endif %}</span></span>
+      <span>{{ stars(a.stars) }} <a class="btn sm" href="{{ url_for('common.result', aid=a.id) }}">Разбор</a></span></div>
+    {% else %}<p class="muted">Вы ещё не проходили кейсы.</p>{% endfor %}</div>
+</div>
+
+{% if badges %}<h2>Значки</h2><div class="row">{% for b in badges %}<span class="badge" title="{{ b.description }}">{{ badge_icon(b.code, 14) }} {{ b.title }}</span>{% endfor %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Журнал{% endblock %}
+{% block body %}
+<h1>Журнал действий</h1>
+<div class="tablewrap"><table><tr><th>Время</th><th>Кто</th><th>Действие</th><th>Объект</th><th>Детали</th></tr>
+{% for r in rows %}<tr><td>{{ r.created_at|dt }}</td><td>{{ r.login or '—' }}</td><td>{{ r.action }}</td><td>{{ r.entity }} {{ r.entity_id or '' }}</td><td class="small">{{ r.details }}</td></tr>
+{% else %}<tr><td colspan="5" class="muted">Журнал пуст.</td></tr>{% endfor %}</table></div>
+{% endblock %}

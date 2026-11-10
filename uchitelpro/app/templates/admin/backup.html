@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% from "_m.html" import csrf with context %}
+{% block title %}Копии{% endblock %}
+{% block body %}
+<h1>Резервные копии</h1>
+<p class="muted">Копия содержит всю базу (пользователи, результаты, кейсы). Графика хранится отдельно в <code>{{ folder }}</code>/../assets — копируйте папку данных целиком.</p>
+<form method="post">{{ csrf() }}<button class="btn primary">Создать копию сейчас</button></form>
+<div class="tablewrap" style="margin-top:14px"><table><tr><th>Файл</th><th>Размер, КБ</th><th></th></tr>
+{% for i in items %}<tr><td>{{ i.name }}</td><td>{{ i.size }}</td><td><a href="{{ url_for('admin.backup_download', name=i.name) }}">Скачать</a></td></tr>
+{% else %}<tr><td colspan="3" class="muted">Копий пока нет.</td></tr>{% endfor %}</table></div>
+<p class="small muted">Восстановление: закройте приложение и замените файл <code>uchitelpro.db</code> в папке данных нужной копией.</p>
+{% endblock %}

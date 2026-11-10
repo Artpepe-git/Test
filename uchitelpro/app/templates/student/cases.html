@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% from "_m.html" import stars, dots with context %}
+{% block title %}Кейсы{% endblock %}
+{% block body %}
+<h1>Каталог кейсов</h1>
+<div class="grid g2" style="margin-top:12px">
+{% for c in items %}
+  <div class="card"><div class="row sp"><span class="badge">{{ c.category }}</span><span class="muted small">~{{ c.duration_min }} мин · версия {{ c.version }}</span></div>
+    <h3 style="margin-top:8px">{{ c.title }}</h3><p class="small muted">{{ c.description }}</p>
+    <div class="row sp"><span class="small">Сложность: {{ dots(c.difficulty) }}</span>
+      {% if best.get(c.id) %}{{ stars(best[c.id].s) }}{% endif %}</div>
+    <p style="margin:12px 0 0"><a class="btn primary" href="{{ url_for('student.case', cid=c.id) }}">Открыть</a>{% if g.user.role in ('teacher', 'methodist', 'admin') %} <a class="btn" href="{{ url_for('methodist.print_case', cid=c.id) }}" target="_blank">Печать</a>{% endif %}</p></div>
+{% else %}<p class="muted">Опубликованных кейсов нет.</p>{% endfor %}
+</div>
+{% endblock %}
