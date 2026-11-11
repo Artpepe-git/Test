@@ -20,6 +20,7 @@ DEMO_SLUGS = ["conflict-5b", "parent-meeting"]
 
 MK_CODE = "ПЕДАГОГ"                       # код для мастер-класса, закрытого от студентов
 DOCX_BASE = "../uchitelpro/app/mk/files/"  # .docx лежат в репозитории рядом
+IMG_BASE = "img/characters/"               # спрайты персонажей рядом со страницей
 
 COMP = {
     "COM": "Коммуникация",
@@ -83,6 +84,7 @@ def main() -> None:
         "const CHARS=" + j(CHARS) + ";\n"
         "const MK_CODE=" + j(MK_CODE) + ";\n"
         "const DOCX_BASE=" + j(DOCX_BASE) + ";\n"
+        "const IMG_BASE=" + j(IMG_BASE) + ";\n"
     )
     parts = [
         "<!doctype html>",

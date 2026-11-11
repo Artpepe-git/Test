@@ -137,9 +137,12 @@ function vPlay() {
   out += '<div class="panel scene">';
   if ((node.characters || []).length) {
     out += '<div class="chars">' + node.characters.map(ch => {
-      const t = charTitle(ch.id), mood = MOODS[ch.mood || "neutral"];
-      return '<span class="ch"><em>' + esc(t.slice(0, 1)) + "</em><b>" + esc(t) + "</b>" +
-        (mood ? "<span>" + esc(mood) + "</span>" : "") + "</span>";
+      const t = charTitle(ch.id), m = ch.mood || "neutral", mood = MOODS[m];
+      const file = IMG_BASE + ch.id + (m === "neutral" ? "" : "_" + m) + ".png";
+      return '<figure class="ch"><img src="' + esc(file) + '" alt="' + esc(t) +
+        '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'em\'),' +
+        '{textContent:' + JSON.stringify(t.slice(0, 1)) + '}))">' +
+        "<figcaption><b>" + esc(t) + "</b>" + (mood ? "<span>" + esc(mood) + "</span>" : "") + "</figcaption></figure>";
     }).join("") + "</div>";
   }
   if (prev) out += '<p class="prev">Ваш выбор: ' + esc(prev) + "</p>";

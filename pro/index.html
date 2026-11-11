@@ -88,10 +88,15 @@ input[type=text]:focus{border-color:var(--accent);box-shadow:var(--glow-select)}
 .badge.fail{background:var(--bad-soft);color:var(--danger)}
 /* сцена */
 .scene{display:flex;flex-direction:column;gap:12px}
-.chars{display:flex;gap:8px;flex-wrap:wrap}
-.ch{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:74px;padding:8px 10px;
-  border:1px dashed var(--line);border-radius:12px;background:var(--surface-raised);font-size:12px;color:var(--muted)}
-.ch em{font-style:normal;font-size:19px;line-height:19px}
+.chars{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:center;
+  padding:6px 0 0;border-bottom:1px solid var(--line)}
+.ch{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0;font-size:12px;color:var(--muted)}
+.ch img{display:block;height:min(190px,32vh);width:auto;max-width:100%;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.ch em{font-style:normal;font-size:22px;line-height:1;width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:var(--surface-raised);
+  border:1px dashed var(--line);color:var(--ink)}
+.ch figcaption{display:flex;flex-direction:column;align-items:center;gap:1px;padding-bottom:6px}
 .ch b{color:var(--ink);font-size:12.5px;font-weight:600;text-align:center;line-height:15px}
 .speaker{font-size:12.5px;color:var(--accent);letter-spacing:.05em;text-transform:uppercase}
 .text{font-size:16px;line-height:24px;white-space:pre-wrap}
@@ -164,6 +169,7 @@ const SCENES={"default":"","classroom":"Класс","classroom_after":"Клас�
 const CHARS={"artem":"Артём","liza":"Лиза","irina":"Ирина","director":"Директор","student_a":"Ученик","parent":"Родитель","admin":"Администратор площадки","coordinator":"Координатор смены","colleague":"Коллега-вожатый","social_teacher":"Социальный педагог","teacher_neighbor":"Педагог из соседнего кабинета","timur":"Тимур","yarik":"Ярик","max":"Макс","max_mom":"Мама Макса","dasha":"Даша"};
 const MK_CODE="ПЕДАГОГ";
 const DOCX_BASE="../uchitelpro/app/mk/files/";
+const IMG_BASE="img/characters/";
 
 </script>
 <script>
@@ -802,9 +808,12 @@ function vPlay() {
   out += '<div class="panel scene">';
   if ((node.characters || []).length) {
     out += '<div class="chars">' + node.characters.map(ch => {
-      const t = charTitle(ch.id), mood = MOODS[ch.mood || "neutral"];
-      return '<span class="ch"><em>' + esc(t.slice(0, 1)) + "</em><b>" + esc(t) + "</b>" +
-        (mood ? "<span>" + esc(mood) + "</span>" : "") + "</span>";
+      const t = charTitle(ch.id), m = ch.mood || "neutral", mood = MOODS[m];
+      const file = IMG_BASE + ch.id + (m === "neutral" ? "" : "_" + m) + ".png";
+      return '<figure class="ch"><img src="' + esc(file) + '" alt="' + esc(t) +
+        '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'em\'),' +
+        '{textContent:' + JSON.stringify(t.slice(0, 1)) + '}))">' +
+        "<figcaption><b>" + esc(t) + "</b>" + (mood ? "<span>" + esc(mood) + "</span>" : "") + "</figcaption></figure>";
     }).join("") + "</div>";
   }
   if (prev) out += '<p class="prev">Ваш выбор: ' + esc(prev) + "</p>";

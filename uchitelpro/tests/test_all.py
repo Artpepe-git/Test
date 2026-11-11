@@ -767,6 +767,17 @@ class AdminFlowTests(AppBase):
         r = self.post(f"/admin/users/{self.uid('admin')}/update", {"action": "deactivate"}, c=self.a)
         self.assertIn("самого себя", r.get_data(as_text=True))
 
+    def test_builtin_assets_shipped(self):
+        """Готовая графика персонажей копируется в data/ и заглушка остаётся для тех, у кого картинки нет."""
+        for f in ("artem.png", "artem_sad.png", "liza_happy.png", "irina_angry.png", "director.png"):
+            self.assertTrue((Path(self.tmp.name) / "assets" / "characters" / f).is_file(), f)
+        html = self.a.get("/admin/assets").get_data(as_text=True)
+        self.assertIn("Персонаж: Координатор смены", html)      # для него картинки нет — остаётся контейнер
+        s = self.client_for("student1", "stud123")
+        cid = self.case_id("parent-meeting")
+        html = self.post(f"/case/{cid}/start", {"mode": "graded"}, c=s).get_data(as_text=True)
+        self.assertIn("/assets/characters/irina", html)
+
     def test_import_students(self):
         r = self.post("/admin/users/import", {"lines": "Петрова А.А.;petrova;ПО-31\nСидоров;sid;ПО-31\nплохая строка\nИванов;petrova;ПО-31"},
                       c=self.a)
@@ -796,7 +807,7 @@ class AdminFlowTests(AppBase):
         cid = self.case_id("conflict-5b")
         html = self.post(f"/case/{cid}/start", {"mode": "graded"}, c=s).get_data(as_text=True)
         self.assertIn("/assets/characters/liza", html)
-        self.assertIn("Персонаж:", html)  # artem остался заглушкой
+        self.assertIn("/assets/characters/artem_angry", html)  # графика из комплекта на месте
         # запрещённое расширение и обход пути
         with self.a.session_transaction() as s2:
             t = s2["csrf"]

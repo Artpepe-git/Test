@@ -90,8 +90,9 @@ tr:last-child td { border-bottom: 0; } .tablewrap { overflow-x: auto; }
   background: linear-gradient(160deg, var(--brand-soft), var(--bg)); background-size: cover; background-position: center; }
 .scene .ph-bg { position: absolute; top: 10px; left: 12px; font-size: .75rem; color: var(--muted); border: 1px dashed var(--muted);
   padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,.5); }
-.cast { display: flex; justify-content: center; align-items: flex-end; gap: 24px; padding: 28px 16px 0; min-height: 230px; }
-.char { text-align: center; } .char img { max-height: 210px; max-width: 200px; display: block; margin: 0 auto; }
+.cast { display: flex; justify-content: center; align-items: flex-end; gap: 24px; padding: 20px 16px 0; min-height: 230px; }
+.char { text-align: center; } .char img { max-height: 260px; max-width: 200px; display: block; margin: 0 auto;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
 .char .ph { width: 120px; height: 190px; border: 2px dashed var(--muted); border-radius: 60px 60px 8px 8px;
   display: flex; align-items: center; justify-content: center; font-size: .75rem; color: var(--muted); padding: 6px; background: rgba(255,255,255,.4); }
 .char .nm { font-size: .78rem; color: var(--muted); margin-top: 3px; }
@@ -116,7 +117,7 @@ tr:last-child td { border-bottom: 0; } .tablewrap { overflow-x: auto; }
   body { background: #fff; color: #000; } .card { box-shadow: none; border-color: #999; }
   .wrap { max-width: none; padding: 0; }
 }
-@media (max-width: 640px) { .cast { gap: 8px; } .char .ph { width: 90px; height: 150px; } h1 { font-size: 1.35rem; } }
+@media (max-width: 640px) { .cast { gap: 8px; } .char .ph { width: 90px; height: 150px; } .char img { max-height: 190px; } h1 { font-size: 1.35rem; } }
 
 .topbar .wrap { max-width: 1320px; }
 .nav a { white-space: nowrap; padding: 8px 9px; }
