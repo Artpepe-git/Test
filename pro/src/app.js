@@ -45,7 +45,6 @@ const stars = n => '<span class="stars">' + [1, 2, 3].map(i =>
   i <= n ? "★" : '<i>★</i>').join("") + "</span>";
 const charTitle = id => CHARS[id] || id;
 const sceneTitle = s => SCENES[s] || "";
-const MOODS = { angry: "злится", sad: "грустит", happy: "радуется", neutral: "" };
 const OUTCOMES = { success: "Успех", partial: "Частичный результат", fail: "Неудача" };
 const RATINGS = { best: "Оптимальный выбор", good: "Приемлемо", weak: "Слабый выбор" };
 function plural(n, a, b, c) {
@@ -137,12 +136,12 @@ function vPlay() {
   out += '<div class="panel scene">';
   if ((node.characters || []).length) {
     out += '<div class="chars">' + node.characters.map(ch => {
-      const t = charTitle(ch.id), m = ch.mood || "neutral", mood = MOODS[m];
+      const t = charTitle(ch.id), m = ch.mood || "neutral";
       const file = IMG_BASE + ch.id + (m === "neutral" ? "" : "_" + m) + ".png";
       return '<figure class="ch"><img src="' + esc(file) + '" alt="' + esc(t) +
         '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'em\'),' +
         '{textContent:' + JSON.stringify(t.slice(0, 1)) + '}))">' +
-        "<figcaption><b>" + esc(t) + "</b>" + (mood ? "<span>" + esc(mood) + "</span>" : "") + "</figcaption></figure>";
+        "<figcaption>" + esc(t) + "</figcaption></figure>";
     }).join("") + "</div>";
   }
   if (prev) out += '<p class="prev">Ваш выбор: ' + esc(prev) + "</p>";

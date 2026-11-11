@@ -96,8 +96,7 @@ input[type=text]:focus{border-color:var(--accent);box-shadow:var(--glow-select)}
 .ch em{font-style:normal;font-size:22px;line-height:1;width:64px;height:64px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;background:var(--surface-raised);
   border:1px dashed var(--line);color:var(--ink)}
-.ch figcaption{display:flex;flex-direction:column;align-items:center;gap:1px;padding-bottom:6px}
-.ch b{color:var(--ink);font-size:12.5px;font-weight:600;text-align:center;line-height:15px}
+.ch figcaption{color:var(--ink);font-size:12.5px;font-weight:600;text-align:center;line-height:15px;padding-bottom:6px}
 .speaker{font-size:12.5px;color:var(--accent);letter-spacing:.05em;text-transform:uppercase}
 .text{font-size:16px;line-height:24px;white-space:pre-wrap}
 .prev{border-left:2px solid var(--line);padding-left:10px;color:var(--muted);font-size:13.5px}
@@ -716,7 +715,6 @@ const stars = n => '<span class="stars">' + [1, 2, 3].map(i =>
   i <= n ? "★" : '<i>★</i>').join("") + "</span>";
 const charTitle = id => CHARS[id] || id;
 const sceneTitle = s => SCENES[s] || "";
-const MOODS = { angry: "злится", sad: "грустит", happy: "радуется", neutral: "" };
 const OUTCOMES = { success: "Успех", partial: "Частичный результат", fail: "Неудача" };
 const RATINGS = { best: "Оптимальный выбор", good: "Приемлемо", weak: "Слабый выбор" };
 function plural(n, a, b, c) {
@@ -808,12 +806,12 @@ function vPlay() {
   out += '<div class="panel scene">';
   if ((node.characters || []).length) {
     out += '<div class="chars">' + node.characters.map(ch => {
-      const t = charTitle(ch.id), m = ch.mood || "neutral", mood = MOODS[m];
+      const t = charTitle(ch.id), m = ch.mood || "neutral";
       const file = IMG_BASE + ch.id + (m === "neutral" ? "" : "_" + m) + ".png";
       return '<figure class="ch"><img src="' + esc(file) + '" alt="' + esc(t) +
         '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'em\'),' +
         '{textContent:' + JSON.stringify(t.slice(0, 1)) + '}))">' +
-        "<figcaption><b>" + esc(t) + "</b>" + (mood ? "<span>" + esc(mood) + "</span>" : "") + "</figcaption></figure>";
+        "<figcaption>" + esc(t) + "</figcaption></figure>";
     }).join("") + "</div>";
   }
   if (prev) out += '<p class="prev">Ваш выбор: ' + esc(prev) + "</p>";
