@@ -238,7 +238,7 @@ function vDebrief() {
 
 // ---------- мои результаты
 function vMe() {
-  const slugs = Object.keys(st.done);
+  const slugs = Object.keys(st.done).filter(s => BY_SLUG[s]);   // кейсы, убранные из демо, не показываем
   let out = topLine() + nav() + '<div class="col"><h1>Мои результаты</h1>' +
     '<p class="muted small">Сохраняются только в этом браузере: другой телефон или режим инкогнито их не увидят. ' +
     "Преподавателю результат показывают с экрана или выгружают файлом.</p></div>";

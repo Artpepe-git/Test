@@ -15,6 +15,9 @@ APP = HERE.parent / "uchitelpro" / "app"
 SRC = HERE / "src"
 OUT = HERE / "index.html"
 
+# Демо-версия показывает только эти кейсы. Пустой список — показывать все.
+DEMO_SLUGS = ["conflict-5b", "parent-meeting"]
+
 MK_CODE = "ПЕДАГОГ"                       # код для мастер-класса, закрытого от студентов
 DOCX_BASE = "../uchitelpro/app/mk/files/"  # .docx лежат в репозитории рядом
 
@@ -46,7 +49,12 @@ def load_cases() -> list[dict]:
     out = []
     for f in sorted((APP / "cases").glob("*.json")):
         d = json.loads(f.read_text(encoding="utf-8"))
+        if DEMO_SLUGS and d["slug"] not in DEMO_SLUGS:
+            continue
         out.append({k: d[k] for k in CASE_FIELDS if k in d})
+    missing = set(DEMO_SLUGS) - {c["slug"] for c in out}
+    if missing:
+        raise SystemExit("Нет кейсов с такими slug: " + ", ".join(sorted(missing)))
     out.sort(key=lambda c: (c["difficulty"], c["title"]))
     return out
 
